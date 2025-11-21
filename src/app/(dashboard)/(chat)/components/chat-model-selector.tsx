@@ -1,5 +1,5 @@
 "use client";
-import { FC, memo, useState } from "react";
+import { FC, memo, startTransition, useState } from "react";
 import {
   ModelSelector,
   ModelSelectorContent,
@@ -32,12 +32,17 @@ export const PureChatModelSelector: FC<PureChatModelSelectorProps> = ({
   const selectedModelData = models.find((m) => m.id === model);
 
   const handleModelChange = (newModelId: string) => {
+    if (newModelId === model) {
+      setModelSelectorOpen(false);
+      return;
+    }
     if (onModelChange) {
       onModelChange(newModelId);
     }
-    saveChatModelAsCookie(newModelId);
-    console.log("model saved to cookie", newModelId);
-    setModelSelectorOpen(false);
+    startTransition(() => {
+      saveChatModelAsCookie(newModelId);
+      setModelSelectorOpen(false);
+    });
   };
 
   return (
