@@ -1,15 +1,13 @@
 "use client";
 import {
   Breadcrumb,
-  BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbLink,
-  BreadcrumbSeparator,
+  BreadcrumbList,
   BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { FC, useState } from "react";
-import { Chat } from "@/lib/types";
-import { useChat } from "@ai-sdk-tools/store";
+import { FC } from "react";
 
 interface ChatBreadcrumbProps {
   chatTitle?: string;
