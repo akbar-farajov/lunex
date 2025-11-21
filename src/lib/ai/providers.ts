@@ -8,11 +8,11 @@ export const providers = createProviderRegistry({
       ),
     },
   }),
-  openai: customProvider({
-    languageModels: {
-      "gpt-4o-mini": gateway.languageModel("openai/gpt-4o-mini"),
-    },
-  }),
+  // openai: customProvider({
+  //   languageModels: {
+  //     "gpt-4o-mini": gateway.languageModel("openai/gpt-4o-mini"),
+  //   },
+  // }),
   cheapest: customProvider({
     languageModels: {
       "longcat-flash-chat": gateway.languageModel("meituan/longcat-flash-chat"),
