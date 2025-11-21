@@ -24,11 +24,13 @@ export default async function DashboardLayout({
   const isCollapsed = sidebarState?.value === "false";
 
   return (
-    <SidebarProvider defaultOpen={!isCollapsed}>
-      <DashboardLayoutClient profilePromise={profilePromise} />
-      <SidebarInset className="flex flex-col h-[100dvh] max-h-[100dvh]">
-        {children}
-      </SidebarInset>
-    </SidebarProvider>
+    <Provider>
+      <SidebarProvider defaultOpen={!isCollapsed}>
+        <DashboardLayoutClient profilePromise={profilePromise} />
+        <SidebarInset className="flex flex-col h-[100dvh] max-h-[100dvh]">
+          {children}
+        </SidebarInset>
+      </SidebarProvider>
+    </Provider>
   );
 }

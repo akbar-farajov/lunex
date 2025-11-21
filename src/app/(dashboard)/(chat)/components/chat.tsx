@@ -49,6 +49,11 @@ export const Chat: FC<ChatProps> = ({
     currentModelIdRef.current = currentModelId;
   }, [currentModelId]);
 
+  useEffect(() => {
+    setCurrentChatId(initialChatId);
+    setTitle(chatTitle);
+  }, [initialChatId, chatTitle]);
+
   const { sendMessage } = useChat<ChatMessage>({
     id: currentChatId,
     messages: initialMessages,
