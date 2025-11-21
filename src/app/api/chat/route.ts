@@ -50,6 +50,7 @@ export async function POST(req: Request) {
     messageId: string;
     modelId?: string;
   } = await req.json();
+  console.log(modelId);
 
   const chat = await getChatById(id);
   switch (trigger) {

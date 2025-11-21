@@ -1,15 +1,19 @@
 "use client";
 import { SquarePenIcon } from "lucide-react";
-import { SidebarMenuButton } from "../ui/sidebar";
-import Link from "next/link";
+import { SidebarMenuButton, useSidebar } from "../ui/sidebar";
 
 export const NewChatButton = () => {
+  const { setOpenMobile } = useSidebar();
   return (
-    <SidebarMenuButton asChild>
-      <Link href="/">
-        <SquarePenIcon />
-        <span>New Chat</span>
-      </Link>
+    <SidebarMenuButton
+      onClick={() => {
+        setOpenMobile(false);
+        window.location.href = "/";
+      }}
+      type="button"
+    >
+      <SquarePenIcon />
+      <span>New Chat</span>
     </SidebarMenuButton>
   );
 };

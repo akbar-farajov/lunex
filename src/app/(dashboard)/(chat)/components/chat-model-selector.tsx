@@ -1,5 +1,12 @@
 "use client";
-import { FC, memo, startTransition, useState } from "react";
+import {
+  FC,
+  memo,
+  startTransition,
+  useCallback,
+  useOptimistic,
+  useState,
+} from "react";
 import {
   ModelSelector,
   ModelSelectorContent,
@@ -17,6 +24,11 @@ import { CheckIcon } from "lucide-react";
 import { models } from "@/lib/ai/models";
 import { saveChatModelAsCookie } from "@/actions/ai";
 
+const DEFAULT_MODEL_ID = models[0]?.id ?? "";
+const SEARCH_PLACEHOLDER = "Search models...";
+const EMPTY_MESSAGE = "No models found.";
+const GROUP_HEADING = "Available Models";
+
 interface PureChatModelSelectorProps {
   selectedModel?: string;
   onModelChange?: (modelId: string) => void;
@@ -26,57 +38,69 @@ export const PureChatModelSelector: FC<PureChatModelSelectorProps> = ({
   selectedModel,
   onModelChange,
 }) => {
-  const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const model = selectedModel || models[0].id;
-  const selectedModelData = models.find((m) => m.id === model);
+  const currentModelId = selectedModel ?? DEFAULT_MODEL_ID;
+  const [optimisticModelId, setOptimisticModelId] =
+    useOptimistic(currentModelId);
 
-  const handleModelChange = (newModelId: string) => {
-    if (newModelId === model) {
-      setModelSelectorOpen(false);
-      return;
-    }
-    if (onModelChange) {
-      onModelChange(newModelId);
-    }
-    startTransition(() => {
-      saveChatModelAsCookie(newModelId);
-      setModelSelectorOpen(false);
-    });
-  };
+  const displayModelId = optimisticModelId;
+  const currentModelData = models.find((m) => m.id === displayModelId);
+
+  const handleModelSelect = useCallback(
+    (modelId: string) => {
+      setIsOpen(false);
+
+      startTransition(() => {
+        setOptimisticModelId(modelId);
+        saveChatModelAsCookie(modelId).catch((error) => {
+          console.error("Failed to save model preference:", error);
+        });
+
+        onModelChange?.(modelId);
+      });
+    },
+    [onModelChange, setOptimisticModelId]
+  );
+
+  if (!currentModelData) {
+    console.warn(`Model data not found for ID: ${displayModelId}`);
+    return null;
+  }
 
   return (
-    <ModelSelector onOpenChange={setModelSelectorOpen} open={modelSelectorOpen}>
+    <ModelSelector onOpenChange={setIsOpen} open={isOpen}>
       <ModelSelectorTrigger asChild>
-        <PromptInputButton>
-          {selectedModelData?.provider && (
-            <ModelSelectorLogo provider={selectedModelData.provider} />
-          )}
-          {selectedModelData?.name && (
-            <ModelSelectorName>{selectedModelData.name}</ModelSelectorName>
-          )}
+        <PromptInputButton aria-label="Select AI model">
+          <ModelSelectorLogo provider={currentModelData.provider} />
+          <ModelSelectorName>{currentModelData.name}</ModelSelectorName>
         </PromptInputButton>
       </ModelSelectorTrigger>
       <ModelSelectorContent>
-        <ModelSelectorInput placeholder="Search models..." />
+        <ModelSelectorInput placeholder={SEARCH_PLACEHOLDER} />
         <ModelSelectorList>
-          <ModelSelectorEmpty>No models found.</ModelSelectorEmpty>
-          <ModelSelectorGroup heading="Available Models">
-            {models.map((m) => (
-              <ModelSelectorItem
-                key={m.id}
-                onSelect={() => handleModelChange(m.id)}
-                value={m.id}
-              >
-                <ModelSelectorLogo provider={m.provider} />
-                <ModelSelectorName>{m.name}</ModelSelectorName>
-                {model === m.id ? (
-                  <CheckIcon className="ml-auto size-4" />
-                ) : (
-                  <div className="ml-auto size-4" />
-                )}
-              </ModelSelectorItem>
-            ))}
+          <ModelSelectorEmpty>{EMPTY_MESSAGE}</ModelSelectorEmpty>
+          <ModelSelectorGroup heading={GROUP_HEADING}>
+            {models.map((model) => {
+              const isSelected = displayModelId === model.id;
+
+              return (
+                <ModelSelectorItem
+                  key={model.id}
+                  value={model.id}
+                  onSelect={() => handleModelSelect(model.id)}
+                >
+                  <ModelSelectorLogo provider={model.provider} />
+                  <ModelSelectorName>{model.name}</ModelSelectorName>
+                  {isSelected && (
+                    <CheckIcon
+                      className="ml-auto size-4"
+                      aria-label="Selected"
+                    />
+                  )}
+                </ModelSelectorItem>
+              );
+            })}
           </ModelSelectorGroup>
         </ModelSelectorList>
       </ModelSelectorContent>
@@ -84,4 +108,12 @@ export const PureChatModelSelector: FC<PureChatModelSelectorProps> = ({
   );
 };
 
-export const ChatModelSelector = memo(PureChatModelSelector);
+export const ChatModelSelector = memo(
+  PureChatModelSelector,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.selectedModel === nextProps.selectedModel &&
+      prevProps.onModelChange === nextProps.onModelChange
+    );
+  }
+);
