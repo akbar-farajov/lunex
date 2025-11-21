@@ -35,6 +35,7 @@ export const Chat: FC<ChatProps> = ({
   chatTitle,
   initialModel,
 }) => {
+  const router = useRouter();
   const [currentChatId, setCurrentChatId] = useState<string | undefined>(
     initialChatId
   );
@@ -43,16 +44,11 @@ export const Chat: FC<ChatProps> = ({
   const [title, setTitle] = useState(chatTitle);
   const [currentModelId, setCurrentModelId] = useState(initialModel);
   const currentModelIdRef = useRef(currentModelId);
-  const pendingMessageRef = useRef<PromptInputMessage | null>(null);
+  const pendingMessageKey = "pending-chat-message";
 
   useEffect(() => {
     currentModelIdRef.current = currentModelId;
   }, [currentModelId]);
-
-  useEffect(() => {
-    setCurrentChatId(initialChatId);
-    setTitle(chatTitle);
-  }, [initialChatId, chatTitle]);
 
   const { sendMessage } = useChat<ChatMessage>({
     id: currentChatId,
@@ -118,12 +114,13 @@ export const Chat: FC<ChatProps> = ({
   });
 
   useEffect(() => {
-    if (currentChatId && pendingMessageRef.current) {
-      const message = pendingMessageRef.current;
-      pendingMessageRef.current = null;
-      window.history.replaceState({}, "", `/chat/${currentChatId}`);
-      sendMessage({ text: message.text || "", files: message.files || [] });
-      setInput("");
+    if (currentChatId) {
+      const pending = sessionStorage.getItem(pendingMessageKey);
+      if (pending) {
+        sessionStorage.removeItem(pendingMessageKey);
+        const message = JSON.parse(pending) as PromptInputMessage;
+        sendMessage({ text: message.text || "", files: message.files || [] });
+      }
     }
   }, [currentChatId, sendMessage]);
 
@@ -137,13 +134,19 @@ export const Chat: FC<ChatProps> = ({
 
     if (!currentChatId) {
       setIsCreatingChat(true);
-      pendingMessageRef.current = data;
+
+      sessionStorage.setItem(pendingMessageKey, JSON.stringify(data));
+
       const chatId = generateUUID();
       const result = await createChat({ chatId });
+
       if (result.data?.id) {
-        setCurrentChatId(result.data.id);
         mutate(getChatHistoryKey());
+        // Use router.push for proper Next.js navigation
+        // This will remount the Provider on the new page
+        router.push(`/chat/${result.data.id}`);
       }
+
       setIsCreatingChat(false);
       return;
     }

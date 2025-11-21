@@ -8,6 +8,7 @@ import { Metadata } from "next";
 import { getChatUsageStats } from "@/actions/usage";
 import { LanguageModelUsage } from "ai";
 import { cookies } from "next/headers";
+import { Provider } from "@ai-sdk-tools/store";
 
 interface Props {
   params: Promise<{ chatId: string }>;
@@ -53,15 +54,17 @@ const ChatPage: FC<Props> = async ({ params }) => {
   const modelIdFromCookie = cookieStore.get("chat-model");
 
   return (
-    <Chat
-      chatTitle={chat.title ?? undefined}
-      chatId={chatId}
-      initialMessages={initialMessages as ChatMessage[]}
-      profile={profile}
-      usage={usageStats as LanguageModelUsage}
-      initialModel={modelIdFromCookie?.value}
-      key={`chat-${chatId}`}
-    />
+    <Provider>
+      <Chat
+        chatTitle={chat.title ?? undefined}
+        chatId={chatId}
+        initialMessages={initialMessages as ChatMessage[]}
+        profile={profile}
+        usage={usageStats as LanguageModelUsage}
+        initialModel={modelIdFromCookie?.value}
+        key={`chat-${chatId}`}
+      />
+    </Provider>
   );
 };
 
