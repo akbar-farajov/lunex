@@ -3,7 +3,7 @@ import { getChats } from "@/actions/chat";
 
 export async function GET() {
   try {
-    const chats = await getChats();
+    const chats = await getChats(15);
     return NextResponse.json(chats || []);
   } catch (error) {
     console.error("Error fetching chats:", error);

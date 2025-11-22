@@ -90,13 +90,20 @@ export async function getMessagesByChatId(
   }
 }
 
-export async function getChats() {
+export async function getChats(limit?: number) {
   const supabase = await createClient();
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from("chats")
       .select("*")
       .order("created_at", { ascending: false });
+
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    const { data, error } = await query;
+
     if (error) {
       throw new Error(error.message);
     }

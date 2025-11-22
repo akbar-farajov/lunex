@@ -12,7 +12,6 @@ import {
   createUIMessageStream,
   createUIMessageStreamResponse,
   stepCountIs,
-  gateway,
 } from "ai";
 
 import { getTools } from "@/tools";
@@ -33,7 +32,7 @@ export const maxDuration = 30;
 
 function getProviderForModel(modelId: string): string {
   const model = models.find((m) => m.id === modelId);
-  return model?.provider || "openai";
+  return model?.provider || "google";
 }
 
 export async function POST(req: Request) {
@@ -50,7 +49,6 @@ export async function POST(req: Request) {
     messageId: string;
     modelId?: string;
   } = await req.json();
-  console.log(modelId);
 
   const chat = await getChatById(id);
   switch (trigger) {
@@ -105,8 +103,7 @@ export async function POST(req: Request) {
     return new Response("No messages found", { status: 404 });
   }
 
-  // Get the selected model, default to first model if not provided
-  const selectedModelId = modelId || "gpt-4o-mini";
+  const selectedModelId = modelId || "gemini-2.5-flash-lite";
   const providerModelId = `${getProviderForModel(
     selectedModelId
   )}:${selectedModelId}` as const;

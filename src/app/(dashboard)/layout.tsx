@@ -4,7 +4,6 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { cookies } from "next/headers";
 import { getUser } from "@/actions/auth";
 import { DashboardLayoutClient } from "./components";
-import { Provider } from "@ai-sdk-tools/store";
 
 export default async function DashboardLayout({
   children,

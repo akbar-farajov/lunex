@@ -15,8 +15,6 @@ import { getChatHistoryKey } from "@/hooks/use-chats";
 import { Header } from "@/app/(dashboard)/components";
 import { ChatBreadcrumb } from "./chat-breadcrumb";
 import { useRouter } from "next/navigation";
-import { models } from "@/lib/ai/models";
-import { saveChatModelAsCookie } from "@/actions/ai";
 
 interface ChatProps {
   chatId?: string;
@@ -33,12 +31,10 @@ export const Chat: FC<ChatProps> = ({
   profile,
   usage,
   chatTitle,
-  initialModel,
+  initialModel = "gemini-2.5-flash-lite",
 }) => {
   const router = useRouter();
-  const [currentChatId, setCurrentChatId] = useState<string | undefined>(
-    initialChatId
-  );
+
   const [input, setInput] = useState("");
   const [isCreatingChat, setIsCreatingChat] = useState(false);
   const [title, setTitle] = useState(chatTitle);
@@ -51,7 +47,7 @@ export const Chat: FC<ChatProps> = ({
   }, [currentModelId]);
 
   const { sendMessage } = useChat<ChatMessage>({
-    id: currentChatId,
+    id: initialChatId,
     messages: initialMessages,
     generateId: generateUUID,
     transport: new DefaultChatTransport({
@@ -114,7 +110,7 @@ export const Chat: FC<ChatProps> = ({
   });
 
   useEffect(() => {
-    if (currentChatId) {
+    if (initialChatId) {
       const pending = sessionStorage.getItem(pendingMessageKey);
       if (pending) {
         sessionStorage.removeItem(pendingMessageKey);
@@ -122,7 +118,7 @@ export const Chat: FC<ChatProps> = ({
         sendMessage({ text: message.text || "", files: message.files || [] });
       }
     }
-  }, [currentChatId, sendMessage]);
+  }, [initialChatId, sendMessage]);
 
   const handleSubmit = async (data: PromptInputMessage) => {
     const hasText = Boolean(data.text?.trim());
@@ -132,7 +128,7 @@ export const Chat: FC<ChatProps> = ({
       return;
     }
 
-    if (!currentChatId) {
+    if (!initialChatId) {
       setIsCreatingChat(true);
 
       sessionStorage.setItem(pendingMessageKey, JSON.stringify(data));
@@ -142,9 +138,8 @@ export const Chat: FC<ChatProps> = ({
 
       if (result.data?.id) {
         mutate(getChatHistoryKey());
-        // Use router.push for proper Next.js navigation
-        // This will remount the Provider on the new page
-        router.push(`/chat/${result.data.id}`);
+
+        router.replace(`/chat/${result.data.id}`);
       }
 
       setIsCreatingChat(false);

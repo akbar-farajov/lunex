@@ -5,6 +5,11 @@ export const models = [
   //   provider: "openai",
   // },
   {
+    id: "gemini-2.5-flash-lite",
+    name: "Gemini 2.5 Flash Lite",
+    provider: "google",
+  },
+  {
     id: "longcat-flash-chat",
     name: "Longcat Flash Chat",
     provider: "cheapest",
@@ -13,10 +18,5 @@ export const models = [
     id: "mistral-large",
     name: "Mistral Large",
     provider: "mistral",
-  },
-  {
-    id: "gemini-2.5-flash-lite",
-    name: "Gemini 2.5 Flash Lite",
-    provider: "google",
   },
 ];
