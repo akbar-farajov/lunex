@@ -172,7 +172,7 @@ export const Chat: FC<ChatProps> = ({
   return (
     <>
       <Header leftContent={<ChatBreadcrumb chatTitle={title} />} />
-      <Messages profile={profile} />
+      <Messages profile={profile} chatId={initialChatId} />
       <ChatComposer
         onSubmit={handleSubmit}
         setInput={setInput}
