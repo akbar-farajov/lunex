@@ -14,7 +14,6 @@ import { mutate } from "swr";
 import { getChatHistoryKey } from "@/hooks/use-chats";
 import { Header } from "@/app/(dashboard)/components";
 import { ChatBreadcrumb } from "./chat-breadcrumb";
-import { useRouter } from "next/navigation";
 
 interface ChatProps {
   chatId?: string;
@@ -33,21 +32,22 @@ export const Chat: FC<ChatProps> = ({
   chatTitle,
   initialModel = "gemini-2.5-flash-lite",
 }) => {
-  const router = useRouter();
-
+  const [currentChatId, setCurrentChatId] = useState<string | undefined>(
+    initialChatId
+  );
   const [input, setInput] = useState("");
   const [isCreatingChat, setIsCreatingChat] = useState(false);
   const [title, setTitle] = useState(chatTitle);
   const [currentModelId, setCurrentModelId] = useState(initialModel);
   const currentModelIdRef = useRef(currentModelId);
-  const pendingMessageKey = "pending-chat-message";
+  const pendingMessageRef = useRef<PromptInputMessage | null>(null);
 
   useEffect(() => {
     currentModelIdRef.current = currentModelId;
   }, [currentModelId]);
 
   const { sendMessage } = useChat<ChatMessage>({
-    id: initialChatId,
+    id: currentChatId,
     messages: initialMessages,
     generateId: generateUUID,
     transport: new DefaultChatTransport({
@@ -110,15 +110,14 @@ export const Chat: FC<ChatProps> = ({
   });
 
   useEffect(() => {
-    if (initialChatId) {
-      const pending = sessionStorage.getItem(pendingMessageKey);
-      if (pending) {
-        sessionStorage.removeItem(pendingMessageKey);
-        const message = JSON.parse(pending) as PromptInputMessage;
-        sendMessage({ text: message.text || "", files: message.files || [] });
-      }
+    if (currentChatId && pendingMessageRef.current) {
+      const message = pendingMessageRef.current;
+      pendingMessageRef.current = null;
+      window.history.replaceState({}, "", `/chat/${currentChatId}`);
+      sendMessage({ text: message.text || "", files: message.files || [] });
+      setInput("");
     }
-  }, [initialChatId, sendMessage]);
+  }, [currentChatId, sendMessage]);
 
   const handleSubmit = async (data: PromptInputMessage) => {
     const hasText = Boolean(data.text?.trim());
@@ -128,20 +127,15 @@ export const Chat: FC<ChatProps> = ({
       return;
     }
 
-    if (!initialChatId) {
+    if (!currentChatId) {
       setIsCreatingChat(true);
-
-      sessionStorage.setItem(pendingMessageKey, JSON.stringify(data));
-
+      pendingMessageRef.current = data;
       const chatId = generateUUID();
       const result = await createChat({ chatId });
-
       if (result.data?.id) {
+        setCurrentChatId(result.data.id);
         mutate(getChatHistoryKey());
-
-        router.replace(`/chat/${result.data.id}`);
       }
-
       setIsCreatingChat(false);
       return;
     }
