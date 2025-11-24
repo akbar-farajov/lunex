@@ -29,6 +29,7 @@ interface PureChatComposerProps {
   isCreatingChat?: boolean;
   onModelChange?: (modelId: string) => void;
   selectedModel?: string;
+  handleStop: () => void;
 }
 
 export const PureChatComposer: FC<PureChatComposerProps> = ({
@@ -39,11 +40,11 @@ export const PureChatComposer: FC<PureChatComposerProps> = ({
   isCreatingChat = false,
   onModelChange,
   selectedModel,
+  handleStop,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const model = selectedModel || models[0].id;
-  const { stop } = useChat();
   const chatStatus = useChatStatus();
 
   return (
@@ -83,7 +84,7 @@ export const PureChatComposer: FC<PureChatComposerProps> = ({
         <PromptInputSubmit
           disabled={!input.trim() && chatStatus !== "streaming"}
           status={isCreatingChat ? "submitted" : chatStatus}
-          onStop={() => stop()}
+          onStop={handleStop}
         />
       </PromptInputFooter>
     </PromptInput>

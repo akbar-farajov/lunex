@@ -71,7 +71,7 @@ export const Chat: FC<ChatProps> = ({
     currentModelIdRef.current = currentModelId;
   }, [currentModelId]);
 
-  const { sendMessage } = useChat<ChatMessage>({
+  const { sendMessage, stop } = useChat<ChatMessage>({
     id: currentChatId,
     messages: initialMessages,
     generateId: generateUUID,
@@ -168,7 +168,10 @@ export const Chat: FC<ChatProps> = ({
     sendMessage({ text: data.text || "", files: data.files || [] });
     setInput("");
   };
-  console.log("isCreatingChat", isCreatingChat);
+
+  const handleStop = () => {
+    stop();
+  };
 
   return (
     <>
@@ -182,6 +185,7 @@ export const Chat: FC<ChatProps> = ({
         isCreatingChat={isCreatingChat}
         selectedModel={currentModelId}
         onModelChange={setCurrentModelId}
+        handleStop={handleStop}
       />
     </>
   );
