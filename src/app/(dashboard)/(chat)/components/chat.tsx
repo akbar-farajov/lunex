@@ -145,7 +145,6 @@ export const Chat: FC<ChatProps> = ({
   }, [currentChatId, sendMessage]);
 
   const handleSubmit = async (data: PromptInputMessage) => {
-    setIsCreatingChat(true);
     const hasText = Boolean(data.text?.trim());
     const hasFiles = (data.files?.length ?? 0) > 0;
 
@@ -154,6 +153,7 @@ export const Chat: FC<ChatProps> = ({
     }
 
     if (!currentChatId) {
+      setIsCreatingChat(true);
       pendingMessageRef.current = data;
       const chatId = generateUUID();
       const result = await createChat({ chatId });
@@ -168,6 +168,7 @@ export const Chat: FC<ChatProps> = ({
     sendMessage({ text: data.text || "", files: data.files || [] });
     setInput("");
   };
+  console.log("isCreatingChat", isCreatingChat);
 
   return (
     <>
