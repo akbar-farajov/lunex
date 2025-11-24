@@ -100,6 +100,9 @@ export const ChatComposer = memo(PureChatComposer, (prevProps, nextProps) => {
   if (prevProps.selectedModel !== nextProps.selectedModel) {
     return false;
   }
+  if (prevProps.isCreatingChat !== nextProps.isCreatingChat) {
+    return false;
+  }
 
   return true;
 });
