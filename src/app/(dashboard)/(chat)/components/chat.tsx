@@ -8,7 +8,7 @@ import type { Profile } from "@/lib/types";
 import { createChat } from "@/actions/chat";
 import { PromptInputMessage } from "@/components/ai-elements/prompt-input";
 import { ChatMessage } from "@/lib/types";
-import { generateUUID } from "@/lib/utils";
+import { cn, generateUUID } from "@/lib/utils";
 import { toast } from "sonner";
 import { mutate } from "swr";
 import { getChatHistoryKey } from "@/hooks/use-chats";
@@ -174,8 +174,14 @@ export const Chat: FC<ChatProps> = ({
   };
 
   return (
-    <>
-      <Header leftContent={<ChatBreadcrumb chatTitle={title} />} />
+    <div className="flex flex-col h-full">
+      <Header
+        leftContent={
+          currentChatId ? (
+            <span className="text-sm font-medium">{title || "New Chat"}</span>
+          ) : undefined
+        }
+      />
       <Messages profile={profile} chatId={initialChatId} />
       <ChatComposer
         onSubmit={handleSubmit}
@@ -187,6 +193,6 @@ export const Chat: FC<ChatProps> = ({
         onModelChange={setCurrentModelId}
         handleStop={handleStop}
       />
-    </>
+    </div>
   );
 };

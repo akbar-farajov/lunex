@@ -1,5 +1,5 @@
 "use client";
-import { useChatStatus, useChat } from "@ai-sdk-tools/store";
+import { useChatStatus } from "@ai-sdk-tools/store";
 import {
   PromptInput,
   PromptInputBody,
@@ -51,7 +51,7 @@ export const PureChatComposer: FC<PureChatComposerProps> = ({
     <PromptInput
       onSubmit={onSubmit}
       multiple={true}
-      className="mt-4 w-full max-w-3xl mx-auto mb-4 p-2 shadow-xs bg-background rounded-lg border-none"
+      className="w-full max-w-3xl mx-auto mb-4 p-2 shadow-xs bg-background rounded-lg border-none"
     >
       <PromptInputBody className="w-full flex flex-row items-center justify-between">
         <div className="flex w-full flex-col items-start justify-start">
