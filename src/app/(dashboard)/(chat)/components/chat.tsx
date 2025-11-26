@@ -8,7 +8,7 @@ import type { Profile } from "@/lib/types";
 import { createChat } from "@/actions/chat";
 import { PromptInputMessage } from "@/components/ai-elements/prompt-input";
 import { ChatMessage } from "@/lib/types";
-import { cn, generateUUID } from "@/lib/utils";
+import { generateUUID } from "@/lib/utils";
 import { toast } from "sonner";
 import { mutate } from "swr";
 import { getChatHistoryKey } from "@/hooks/use-chats";
@@ -178,7 +178,9 @@ export const Chat: FC<ChatProps> = ({
       <Header
         leftContent={
           currentChatId ? (
-            <span className="text-sm font-medium">{title || "New Chat"}</span>
+            <span className="text-sm font-medium line-clamp-1">
+              {title || "New Chat"}
+            </span>
           ) : undefined
         }
       />
