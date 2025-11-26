@@ -3,7 +3,7 @@ import { FC, useState, useEffect, useRef } from "react";
 import { useChat } from "@ai-sdk-tools/store";
 import { Messages } from "@/app/(dashboard)/(chat)/components/messages";
 import { ChatComposer } from "@/app/(dashboard)/(chat)/components/chat-composer";
-import { DefaultChatTransport, LanguageModelUsage } from "ai";
+import { DefaultChatTransport } from "ai";
 import type { Profile } from "@/lib/types";
 import { createChat } from "@/actions/chat";
 import { PromptInputMessage } from "@/components/ai-elements/prompt-input";
@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { mutate } from "swr";
 import { getChatHistoryKey } from "@/hooks/use-chats";
 import { Header } from "@/app/(dashboard)/components";
-import { ChatBreadcrumb } from "./chat-breadcrumb";
 import { usePathname } from "next/navigation";
 import { useChatStoreApi } from "@ai-sdk-tools/store";
 
@@ -21,7 +20,6 @@ interface ChatProps {
   chatId?: string;
   initialMessages?: ChatMessage[];
   profile?: Profile;
-  usage?: LanguageModelUsage;
   chatTitle?: string;
   initialModel?: string;
 }
@@ -30,7 +28,6 @@ export const Chat: FC<ChatProps> = ({
   chatId: initialChatId,
   initialMessages = [],
   profile,
-  usage,
   chatTitle,
   initialModel = "gemini-2.5-flash-lite",
 }) => {
@@ -117,9 +114,9 @@ export const Chat: FC<ChatProps> = ({
     }),
 
     onData(event) {
-      if (event.type === "data-usage") {
-        console.log((event.data as LanguageModelUsage).outputTokens);
-      }
+      // if (event.type === "data-usage") {
+      //   console.log((event.data as any).outputTokens);
+      // }
       if (event.type === "data-title") {
         setTitle(event.data as string);
         mutate(getChatHistoryKey());
@@ -174,7 +171,7 @@ export const Chat: FC<ChatProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full px-2">
       <Header
         leftContent={
           currentChatId ? (
@@ -189,7 +186,6 @@ export const Chat: FC<ChatProps> = ({
         onSubmit={handleSubmit}
         setInput={setInput}
         input={input}
-        usage={usage as LanguageModelUsage}
         isCreatingChat={isCreatingChat}
         selectedModel={currentModelId}
         onModelChange={setCurrentModelId}

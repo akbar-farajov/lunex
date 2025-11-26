@@ -5,8 +5,6 @@ import { notFound, redirect } from "next/navigation";
 import { ChatMessage } from "@/lib/types";
 import { getProfile } from "@/actions/profile";
 import { Metadata } from "next";
-import { getChatUsageStats } from "@/actions/usage";
-import { LanguageModelUsage } from "ai";
 import { cookies } from "next/headers";
 
 interface Props {
@@ -36,8 +34,6 @@ const ChatPage: FC<Props> = async ({ params }) => {
   if (!chat) {
     notFound();
   }
-  const result = await getChatUsageStats(chatId);
-  const { data: usageStats } = result;
 
   const { data: profile, error } = await getProfile();
   if (error) {
@@ -58,7 +54,6 @@ const ChatPage: FC<Props> = async ({ params }) => {
       chatId={chatId}
       initialMessages={initialMessages as ChatMessage[]}
       profile={profile}
-      usage={usageStats as LanguageModelUsage}
       initialModel={modelIdFromCookie?.value}
     />
   );
