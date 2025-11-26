@@ -25,7 +25,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({
   profilePromise,
 }) => {
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" variant="floating">
       <AppSidebarHeader />
       <SidebarContent>
         <SidebarGroup>
@@ -41,7 +41,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({
       <SidebarFooter>
         <NavUserWrapper profilePromise={profilePromise} />
       </SidebarFooter>
-      <SidebarRail />
+      {/* <SidebarRail /> */}
     </Sidebar>
   );
 };
