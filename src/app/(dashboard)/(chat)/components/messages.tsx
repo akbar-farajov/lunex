@@ -64,15 +64,6 @@ export const PureMessages: FC<PureMessagesProps> = ({
 
   const showSkeleton = isLoading || (messages.length === 0 && chatId);
 
-  console.log(
-    "isLoading",
-    isLoading,
-    "messages.length",
-    messages.length,
-    "chatId",
-    chatId
-  );
-
   return (
     <Conversation className="w-full flex-1 scroll-smooth">
       <ConversationContent className="max-w-3xl mx-auto">
