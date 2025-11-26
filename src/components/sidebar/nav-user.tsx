@@ -33,13 +33,13 @@ import { FC } from "react";
 import type { Profile, Chat } from "@/lib/types";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface NavUserProps {
   profile: Profile | null;
   chats: Chat[];
 }
 
-// Generate a consistent color based on email
 const getColorFromEmail = (email: string): string => {
   const colors = [
     "bg-red-500",
@@ -61,7 +61,6 @@ const getColorFromEmail = (email: string): string => {
     "bg-rose-500",
   ];
 
-  // Simple hash function to get consistent color for same email
   let hash = 0;
   for (let i = 0; i < email.length; i++) {
     hash = email.charCodeAt(i) + ((hash << 5) - hash);
@@ -72,6 +71,7 @@ const getColorFromEmail = (email: string): string => {
 
 export const NavUser: FC<NavUserProps> = ({ profile, chats }) => {
   const { theme, setTheme } = useTheme();
+  const isMobile = useIsMobile();
 
   const themeOptions = [
     { value: "light", label: "Light", icon: Sun },
@@ -116,8 +116,8 @@ export const NavUser: FC<NavUserProps> = ({ profile, chats }) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side="right"
-            align="end"
+            side={isMobile ? "bottom" : "right"}
+            align={isMobile ? "start" : "end"}
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
