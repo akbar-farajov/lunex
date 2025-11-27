@@ -22,6 +22,7 @@ import {
   ToolOutput,
 } from "@/components/ai-elements/tool";
 import { ChatMessage } from "@/lib/types";
+import { GetWeatherTool } from "./get-weather-tool";
 
 interface PureAIMessageProps {
   message: ChatMessage;
@@ -76,7 +77,7 @@ export const PureAIMessage: FC<PureAIMessageProps> = ({
                     {part.state === "output-available" && (
                       <ToolOutput
                         errorText={part.errorText}
-                        output={part.output}
+                        output={<GetWeatherTool data={part.output} />}
                       />
                     )}
                   </ToolContent>
