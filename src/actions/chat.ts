@@ -90,15 +90,17 @@ export async function getMessagesByChatId(
   }
 }
 
-export async function getChats(limit?: number) {
+export async function getChats(limit?: number, offset?: number) {
   const supabase = await createClient();
   try {
     let query = supabase
       .from("chats")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("updated_at", { ascending: false });
 
-    if (limit) {
+    if (offset !== undefined && limit) {
+      query = query.range(offset, offset + limit - 1);
+    } else if (limit) {
       query = query.limit(limit);
     }
 
