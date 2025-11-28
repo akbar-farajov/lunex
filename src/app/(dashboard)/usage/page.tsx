@@ -18,6 +18,8 @@ import { Badge } from "@/components/ui/badge";
 import { DAILY_TOKEN_LIMIT } from "@/lib/constants";
 import { Header } from "../components";
 import { BreadcrumbPage } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const UsagePage = async () => {
   const { data: usageData, error: usageError } = await getUserUsage({
@@ -60,8 +62,16 @@ const UsagePage = async () => {
   return (
     <div className="flex flex-col h-full">
       <Header
-        leftContent={<BreadcrumbPage>Usage</BreadcrumbPage>}
-        rightContent
+        leftContent={
+          <span className="text-sm font-medium line-clamp-1">Usage</span>
+        }
+        rightContent={
+          <div className="flex items-center gap-2">
+            <Button size="sm" asChild>
+              <Link href="/usage/history">Upgrade to Pro</Link>
+            </Button>
+          </div>
+        }
       />
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">

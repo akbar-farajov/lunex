@@ -175,22 +175,22 @@ export const Chat: FC<ChatProps> = ({
       <Header
         leftContent={
           currentChatId ? (
-            <span className="text-sm font-medium line-clamp-1">
-              {title || "New Chat"}
-            </span>
+            <span className="text-sm font-medium line-clamp-1">{title}</span>
           ) : undefined
         }
       />
       <Messages profile={profile} chatId={initialChatId} />
-      <ChatComposer
-        onSubmit={handleSubmit}
-        setInput={setInput}
-        input={input}
-        isCreatingChat={isCreatingChat}
-        selectedModel={currentModelId}
-        onModelChange={setCurrentModelId}
-        handleStop={handleStop}
-      />
+      <div className="px-2">
+        <ChatComposer
+          onSubmit={handleSubmit}
+          setInput={setInput}
+          input={input}
+          isCreatingChat={isCreatingChat}
+          selectedModel={currentModelId}
+          onModelChange={setCurrentModelId}
+          handleStop={handleStop}
+        />
+      </div>
     </div>
   );
 };
