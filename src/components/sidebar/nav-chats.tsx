@@ -59,7 +59,7 @@ export const NavChats: FC<NavChatsProps> = ({
           <SidebarMenuItem key={chat.id}>
             {renameChatId === chat.id ? (
               <Input
-                className="p-2"
+                className="border-primary"
                 type="text"
                 value={renameChat || ""}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -74,44 +74,46 @@ export const NavChats: FC<NavChatsProps> = ({
                 onBlur={() => handleSaveRename(chat.id)}
               />
             ) : (
-              <Link href={`/chat/${chat.id}`} className="w-full">
-                <SidebarMenuButton
-                  className="justify-between w-full"
-                  isActive={currentChatId === chat.id}
-                >
-                  <span className="text-sm truncate">{displayTitle}</span>
-                </SidebarMenuButton>
-              </Link>
-            )}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuAction showOnHover>
-                  <MoreHorizontal />
-                  <span className="sr-only">More</span>
-                </SidebarMenuAction>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-48 rounded-lg"
-                side="right"
-                align="start"
-              >
-                <DropdownMenuItem
-                  onSelect={() => {
-                    setRenameChatId(chat.id);
-                    setRenameChat(displayTitle);
-                  }}
-                >
-                  <PencilIcon className="text-muted-foreground" />
-                  <span>Rename</span>
-                </DropdownMenuItem>
+              <>
+                <Link href={`/chat/${chat.id}`} className="w-full">
+                  <SidebarMenuButton
+                    className="justify-between w-full"
+                    isActive={currentChatId === chat.id}
+                  >
+                    <span className="text-sm truncate">{displayTitle}</span>
+                  </SidebarMenuButton>
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuAction showOnHover>
+                      <MoreHorizontal />
+                      <span className="sr-only">More</span>
+                    </SidebarMenuAction>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="w-48 rounded-lg"
+                    side="right"
+                    align="start"
+                  >
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        setRenameChatId(chat.id);
+                        setRenameChat(displayTitle);
+                      }}
+                    >
+                      <PencilIcon className="text-muted-foreground" />
+                      <span>Rename</span>
+                    </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => setDeleteChatId(chat.id)}>
-                  <Trash2 className="text-destructive" />
-                  <span className="text-destructive">Delete</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={() => setDeleteChatId(chat.id)}>
+                      <Trash2 className="text-destructive" />
+                      <span className="text-destructive">Delete</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            )}
           </SidebarMenuItem>
         );
       })}

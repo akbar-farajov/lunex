@@ -15,7 +15,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
     >
       <AiSdkProvider>{children}</AiSdkProvider>
-      <Toaster />
+      <Toaster richColors />
       <Analytics />
       <SpeedInsights />
     </ThemeProvider>

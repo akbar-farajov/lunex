@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
 import { getProfile } from "@/actions/profile";
-import { SidebarInset } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getUser } from "@/actions/auth";
 import { DashboardLayoutClient } from "./components";
-import { DashboardProviders } from "./dashboard-providers";
 import { cookies } from "next/headers";
 
 export default async function DashboardLayout({
@@ -24,11 +23,11 @@ export default async function DashboardLayout({
   const defaultOpen = sidebarState?.value === "true";
 
   return (
-    <DashboardProviders defaultOpen={defaultOpen}>
+    <SidebarProvider defaultOpen={defaultOpen}>
       <DashboardLayoutClient profilePromise={profilePromise} />
       <SidebarInset className="flex flex-col h-[100dvh] max-h-[100dvh]">
         {children}
       </SidebarInset>
-    </DashboardProviders>
+    </SidebarProvider>
   );
 }

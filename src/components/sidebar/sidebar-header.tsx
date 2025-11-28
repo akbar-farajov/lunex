@@ -1,6 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
-import { SidebarHeader, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  SidebarHeader,
+  SidebarMenuButton,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 export const AppSidebarHeader = () => {
   return (
@@ -11,7 +15,9 @@ export const AppSidebarHeader = () => {
       >
         <Image src="/icons/logo.svg" alt="Logo" width={24} height={24} />
       </Link>
-      <SidebarTrigger className="p-4" />
+      <SidebarMenuButton asChild tooltip="Toggle Sidebar" className="w-min">
+        <SidebarTrigger />
+      </SidebarMenuButton>
     </SidebarHeader>
   );
 };
