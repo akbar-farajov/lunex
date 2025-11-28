@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { generateText } from "ai";
 import type { Json } from "@/lib/supabase/types";
-import { google } from "@ai-sdk/google";
+import { providers } from "@/lib/ai/providers";
 import { ChatMessage } from "@/lib/types";
 import { getUser } from "./auth";
 import { revalidatePath } from "next/cache";
@@ -138,7 +138,7 @@ export async function generateTitleFromUserMessage({
   message: ChatMessage;
 }) {
   const { text: title } = await generateText({
-    model: google("gemini-2.5-flash-lite"),
+    model: providers.languageModel("google:gemini-2.5-flash-lite"),
     system: `\n
     - you will generate a short title based on the first message a user begins a conversation with
     - ensure it is not more than 80 characters long
