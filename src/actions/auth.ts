@@ -51,7 +51,6 @@ export async function logout() {
   }
 
   revalidatePath("/", "layout");
-  redirect("/login");
 }
 
 export async function googleLogin() {
