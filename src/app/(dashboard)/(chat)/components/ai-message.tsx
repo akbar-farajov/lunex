@@ -6,6 +6,8 @@ import {
   CopyIcon,
   PaperclipIcon,
   RefreshCcwIcon,
+  Volume2Icon,
+  SquareIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { Message } from "@/components/ai-elements/message";
@@ -23,6 +25,9 @@ import {
 } from "@/components/ai-elements/tool";
 import { ChatMessage } from "@/lib/types";
 import { GetWeatherTool } from "./get-weather-tool";
+import { Button } from "@/components/ui/button";
+import { useSpeechSynthesis } from "@/hooks/use-speech-synthesis";
+import { cleanTextForSpeech } from "@/lib/text-utils";
 
 interface PureAIMessageProps {
   message: ChatMessage;
@@ -35,6 +40,11 @@ export const PureAIMessage: FC<PureAIMessageProps> = ({
 }) => {
   const { regenerate } = useChatActions();
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { isSpeaking, speak, stop } = useSpeechSynthesis();
+
+  const textContent = message.parts
+    .map((part) => (part.type === "text" ? part.text : ""))
+    .join("\n");
 
   const handleCopy = async (text: string, messageId: string) => {
     try {
@@ -46,9 +56,14 @@ export const PureAIMessage: FC<PureAIMessageProps> = ({
     }
   };
 
-  const textContent = message.parts
-    .map((part) => (part.type === "text" ? part.text : ""))
-    .join("\n");
+  const handleSpeak = () => {
+    if (isSpeaking) {
+      stop();
+    } else {
+      const cleanedText = cleanTextForSpeech(textContent);
+      speak(cleanedText);
+    }
+  };
 
   const handleRegenerate = () => {
     regenerate({ messageId: message.id });
@@ -138,6 +153,18 @@ export const PureAIMessage: FC<PureAIMessageProps> = ({
               <CopyIcon className="size-4" />
             )}
           </Action>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={handleSpeak}
+            className="size-8 rounded-lg text-muted-foreground"
+          >
+            {isSpeaking ? (
+              <SquareIcon className="size-4" />
+            ) : (
+              <Volume2Icon className="size-4" />
+            )}
+          </Button>
           <Action
             label="Regenerate"
             tooltip="Regenerate"
