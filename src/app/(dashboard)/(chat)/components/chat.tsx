@@ -171,7 +171,7 @@ export const Chat: FC<ChatProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full px-2">
+    <div className="flex flex-col h-full">
       <Header
         leftContent={
           currentChatId ? (
