@@ -42,9 +42,7 @@ export default async function LandingPage() {
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/signup">
-              <Button size="lg" className="w-full sm:w-auto">
-                Try Lunex
-              </Button>
+              <Button className="w-full sm:w-auto">Try Lunex</Button>
             </Link>
             <GoogleAuthButton />
           </div>
