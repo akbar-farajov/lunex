@@ -6,10 +6,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Header } from "../components";
 
 const RecentsLoading = () => {
   return (
     <div className="flex flex-col h-full">
+      <Header
+        leftContent={<Skeleton className="h-4 w-20" />}
+      />
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto p-4 md:p-6">
           <div className="space-y-4">

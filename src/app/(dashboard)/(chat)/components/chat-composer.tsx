@@ -15,7 +15,7 @@ import {
   PromptInputAttachment,
   PromptInputMessage,
 } from "@/components/ai-elements/prompt-input";
-import { FC, memo, useRef } from "react";
+import { FC, memo, useRef, useEffect } from "react";
 import { ChatModelSelector } from "./chat-model-selector";
 
 interface PureChatComposerProps {
@@ -40,6 +40,12 @@ export const PureChatComposer: FC<PureChatComposerProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const chatStatus = useChatStatus();
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, []);
 
   return (
     <PromptInput
