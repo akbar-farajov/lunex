@@ -10,13 +10,13 @@ import { Header } from "../components";
 
 const UsageLoading = () => {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-screen overflow-hidden">
       <Header
         leftContent={<Skeleton className="h-4 w-16" />}
         rightContent={<Skeleton className="h-8 w-32" />}
       />
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+      <div className="flex-1 overflow-hidden">
+        <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6 h-full overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {[1, 2, 3, 4, 5].map((i) => (
               <Card key={i}>
