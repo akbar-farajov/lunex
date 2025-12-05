@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
-import { Chat } from "./components";
+import { Chat } from "../components";
 
-export default async function Home() {
+export default async function NewChatPage() {
   const cookieStore = await cookies();
   const modelIdFromCookie = cookieStore.get("chat-model");
 

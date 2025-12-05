@@ -31,7 +31,7 @@ export function LoginForm({
         toast.error(result.error);
       } else {
         toast.success("Logged in successfully");
-        router.push("/");
+        router.push("/new");
       }
     });
   };

@@ -32,7 +32,7 @@ export async function updateSession(request: NextRequest) {
 
   const { data: user } = await getUser();
 
-  const publicRoutes = ["/login", "/signup", "/auth/callback", "/error"];
+  const publicRoutes = ["/login", "/signup", "/auth/callback", "/error", "/"];
   const isPublicRoute = publicRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   );
@@ -49,7 +49,7 @@ export async function updateSession(request: NextRequest) {
       request.nextUrl.pathname === "/signup")
   ) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/new";
     return NextResponse.redirect(url);
   }
 

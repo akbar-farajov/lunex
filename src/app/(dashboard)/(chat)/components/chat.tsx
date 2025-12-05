@@ -44,7 +44,7 @@ export const Chat: FC<ChatProps> = ({
   const storeApi = useChatStoreApi();
 
   useEffect(() => {
-    if (pathname === "/" || pathname === "") {
+    if (pathname === "/new" || pathname === "/new/") {
       const state = storeApi.getState();
       state.reset();
       state.setId(undefined);

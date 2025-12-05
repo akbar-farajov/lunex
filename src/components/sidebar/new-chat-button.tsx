@@ -6,7 +6,7 @@ import { SidebarMenuButton } from "../ui/sidebar";
 export const NewChatButton = () => {
   return (
     <SidebarMenuButton asChild tooltip="New Chat">
-      <Link href="/">
+      <Link href="/new">
         <SquarePenIcon />
         <span>New Chat</span>
       </Link>

@@ -17,7 +17,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { DAILY_TOKEN_LIMIT } from "@/lib/constants";
 import { Header } from "../components";
-import { BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 

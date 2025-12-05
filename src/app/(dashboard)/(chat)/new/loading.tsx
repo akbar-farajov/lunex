@@ -1,4 +1,4 @@
-import { Header } from "../components";
+import { Header } from "../../components";
 import { Conversation } from "@/components/ai-elements/conversation";
 import { ConversationContent } from "@/components/ai-elements/conversation";
 import { Skeleton } from "@/components/ui/skeleton";

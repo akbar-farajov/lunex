@@ -31,7 +31,7 @@ export function SignUpForm({
         toast.error(result.error);
       } else {
         toast.success("Account created successfully");
-        router.push("/");
+        router.push("/login");
       }
     });
   };

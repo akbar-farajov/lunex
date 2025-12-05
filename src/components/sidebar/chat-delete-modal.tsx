@@ -38,7 +38,7 @@ export const ChatDeleteModal: FC<ChatDeleteModalProps> = ({
         await deleteChat(chatId);
         mutate(getChatHistoryKey());
         if (chatId === currentChatId) {
-          router.push("/");
+          router.push("/new");
         }
         toast.success("Chat deleted successfully");
       } catch (error) {
