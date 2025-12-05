@@ -46,19 +46,12 @@ export default function ChatLoading() {
       </Conversation>
       <div className="px-2">
         <div className="w-full max-w-3xl mx-auto mb-4 shadow-xs bg-muted/20 rounded-lg border-none">
-          {/* Body area matching composer height */}
-          <div className="w-full min-h-16 px-3 py-3 flex items-center">
-            {/* Empty space to match textarea area */}
-          </div>
-          {/* Footer with tools and submit button */}
+          <div className="w-full min-h-16 px-3 py-3 flex items-center"></div>
           <div className="flex items-center justify-between gap-1 px-3 pb-3">
             <div className="flex items-center gap-1">
-              {/* + button skeleton */}
               <Skeleton className="h-8 w-8 rounded-md" />
-              {/* Model name skeleton */}
               <Skeleton className="h-8 w-32 rounded-md" />
             </div>
-            {/* Submit button skeleton */}
             <Skeleton className="h-8 w-8 rounded-md" />
           </div>
         </div>
