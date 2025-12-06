@@ -1,36 +1,18 @@
 "use client";
 
-import { FC, memo, useState } from "react";
-import { CopyIcon, CheckIcon, PencilIcon } from "lucide-react";
+import { FC, memo } from "react";
 import { Message } from "@/components/ai-elements/message";
 import { MessageContent } from "@/components/ai-elements/message";
 import { Response } from "@/components/ai-elements/response";
-import { Action } from "@/components/ai-elements/actions";
-import { Actions } from "@/components/ai-elements/actions";
 import { ChatMessage } from "@/lib/types";
 import Image from "next/image";
+import { UserMessageActions } from "./user-message-actions";
 
 interface PureUserMessageProps {
   message: ChatMessage;
 }
 
 export const PureUserMessage: FC<PureUserMessageProps> = ({ message }) => {
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  const handleCopy = async (text: string, messageId: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedId(messageId);
-      setTimeout(() => setCopiedId(null), 2000);
-    } catch (error) {
-      console.error("Failed to copy text:", error);
-    }
-  };
-
-  const handleEdit = () => {
-    console.log("Edit functionality not yet implemented");
-  };
-
   const textContent = message.parts
     .filter((part) => part.type === "text")
     .map((part) => (part.type === "text" ? part.text : ""))
@@ -71,29 +53,7 @@ export const PureUserMessage: FC<PureUserMessageProps> = ({ message }) => {
             );
         }
       })}
-      <Actions className="flex justify-end w-full opacity-0 group-hover:opacity-100 transition-opacity">
-        <Action
-          label="Copy"
-          tooltip="Copy"
-          variant="ghost"
-          onClick={() => handleCopy(textContent, message.id)}
-        >
-          {copiedId === message.id ? (
-            <CheckIcon className="size-4" />
-          ) : (
-            <CopyIcon className="size-4" />
-          )}
-        </Action>
-        <Action
-          label="Edit"
-          tooltip="Edit"
-          variant="ghost"
-          onClick={handleEdit}
-          disabled
-        >
-          <PencilIcon className="size-4" />
-        </Action>
-      </Actions>
+      <UserMessageActions messageId={message.id} textContent={textContent} />
     </Message>
   );
 };

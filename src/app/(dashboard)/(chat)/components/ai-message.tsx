@@ -1,21 +1,11 @@
 "use client";
 
-import { FC, memo, useState } from "react";
-import {
-  CheckIcon,
-  CopyIcon,
-  PaperclipIcon,
-  RefreshCcwIcon,
-  Volume2Icon,
-  SquareIcon,
-} from "lucide-react";
+import { FC, memo } from "react";
+import { PaperclipIcon } from "lucide-react";
 import Image from "next/image";
 import { Message } from "@/components/ai-elements/message";
 import { MessageContent } from "@/components/ai-elements/message";
 import { Response } from "@/components/ai-elements/response";
-import { Action } from "@/components/ai-elements/actions";
-import { Actions } from "@/components/ai-elements/actions";
-import { useChatActions } from "@ai-sdk-tools/store";
 import {
   Tool,
   ToolContent,
@@ -25,9 +15,7 @@ import {
 } from "@/components/ai-elements/tool";
 import { ChatMessage } from "@/lib/types";
 import { GetWeatherTool } from "./get-weather-tool";
-import { Button } from "@/components/ui/button";
-import { useSpeechSynthesis } from "@/hooks/use-speech-synthesis";
-import { cleanTextForSpeech } from "@/lib/text-utils";
+import { AIMessageActions } from "./ai-message-actions";
 
 interface PureAIMessageProps {
   message: ChatMessage;
@@ -38,36 +26,9 @@ export const PureAIMessage: FC<PureAIMessageProps> = ({
   message,
   isStreaming = false,
 }) => {
-  const { regenerate } = useChatActions();
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const { isSpeaking, speak, stop } = useSpeechSynthesis();
-
   const textContent = message.parts
     .map((part) => (part.type === "text" ? part.text : ""))
     .join("\n");
-
-  const handleCopy = async (text: string, messageId: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedId(messageId);
-      setTimeout(() => setCopiedId(null), 2000);
-    } catch (error) {
-      console.error("Failed to copy text:", error);
-    }
-  };
-
-  const handleSpeak = () => {
-    if (isSpeaking) {
-      stop();
-    } else {
-      const cleanedText = cleanTextForSpeech(textContent);
-      speak(cleanedText);
-    }
-  };
-
-  const handleRegenerate = () => {
-    regenerate({ messageId: message.id });
-  };
 
   return (
     <Message
@@ -140,40 +101,7 @@ export const PureAIMessage: FC<PureAIMessageProps> = ({
         })}
       </MessageContent>
       {!isStreaming && (
-        <Actions className="flex justify-start w-full opacity-0 group-hover:opacity-100 transition-opacity">
-          <Action
-            label="Copy"
-            tooltip="Copy"
-            variant="ghost"
-            onClick={() => handleCopy(textContent, message.id)}
-          >
-            {copiedId === message.id ? (
-              <CheckIcon className="size-4" />
-            ) : (
-              <CopyIcon className="size-4" />
-            )}
-          </Action>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={handleSpeak}
-            className="size-8 rounded-lg text-muted-foreground"
-          >
-            {isSpeaking ? (
-              <SquareIcon className="size-4" />
-            ) : (
-              <Volume2Icon className="size-4" />
-            )}
-          </Button>
-          <Action
-            label="Regenerate"
-            tooltip="Regenerate"
-            variant="ghost"
-            onClick={handleRegenerate}
-          >
-            <RefreshCcwIcon className="size-4" />
-          </Action>
-        </Actions>
+        <AIMessageActions messageId={message.id} textContent={textContent} />
       )}
     </Message>
   );

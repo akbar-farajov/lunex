@@ -13,6 +13,7 @@ import { UserMessage } from "./user-message";
 import { useChatMessages, useChatStatus, useChatId } from "@ai-sdk-tools/store";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Message, MessageContent } from "@/components/ai-elements/message";
+import { cn } from "@/lib/utils";
 
 interface PureMessagesProps {
   profile?: Profile;
@@ -64,9 +65,16 @@ export const PureMessages: FC<PureMessagesProps> = ({
 
   const showSkeleton = isLoading || (messages.length === 0 && chatId);
 
+  const isEmpty = !showSkeleton && messages.length === 0;
+
   return (
     <Conversation className="w-full flex-1 scroll-smooth">
-      <ConversationContent className="max-w-3xl mx-auto">
+      <ConversationContent
+        className={cn(
+          "max-w-3xl mx-auto",
+          isEmpty && "min-h-full flex items-center justify-center"
+        )}
+      >
         {showSkeleton ? (
           <div className="space-y-6 py-6">
             <MessageSkeleton isUser={true} />

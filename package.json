@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "generate:types": "npx supabase gen types typescript --local > src/lib/supabase/types.ts",
+    "start:db": "npx supabase start",
+    "stop:db": "npx supabase stop",
+    "restart:db": "npx supabase restart",
     "reset:db": "npx supabase db reset",
     "push:db": "npx supabase db push",
     "push:db-local": "npx supabase db push --local"
