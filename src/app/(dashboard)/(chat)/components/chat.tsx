@@ -15,6 +15,7 @@ import { getChatHistoryKey } from "@/hooks/use-chats";
 import { Header } from "@/app/(dashboard)/components";
 import { usePathname } from "next/navigation";
 import { useChatStoreApi } from "@ai-sdk-tools/store";
+import { WelcomeInstructions } from "./welcome-instructions";
 
 interface ChatProps {
   chatId?: string;
@@ -179,6 +180,7 @@ export const Chat: FC<ChatProps> = ({
           ) : undefined
         }
       />
+      <WelcomeInstructions />
       <Messages profile={profile} chatId={initialChatId} />
       <div className="px-2">
         <ChatComposer
