@@ -171,7 +171,7 @@ export const Chat: FC<ChatProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <main className="flex flex-col h-full" aria-label="Chat">
       <Header
         leftContent={
           currentChatId ? (
@@ -191,6 +191,6 @@ export const Chat: FC<ChatProps> = ({
           handleStop={handleStop}
         />
       </div>
-    </div>
+    </main>
   );
 };

@@ -99,15 +99,18 @@ const ContextIcon = () => {
 export type ContextTriggerProps = ComponentProps<typeof Button>;
 
 export const ContextTrigger = ({ children, ...props }: ContextTriggerProps) => {
-  const { usedTokens, maxTokens } = useContextValue();
-  const usedPercent = usedTokens / maxTokens;
-
   return (
     <HoverCardTrigger asChild>
       {children ?? (
-        <button type="button" size="icon" variant="ghost" {...props}>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          aria-label="View model context usage"
+          {...props}
+        >
           <ContextIcon />
-        </button>
+        </Button>
       )}
     </HoverCardTrigger>
   );

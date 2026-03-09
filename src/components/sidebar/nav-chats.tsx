@@ -61,6 +61,8 @@ export const NavChats: FC<NavChatsProps> = ({
               <Input
                 className="border-primary"
                 type="text"
+                aria-label="Rename chat"
+                autoFocus
                 value={renameChat || ""}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setRenameChat(e.target.value)
@@ -69,6 +71,10 @@ export const NavChats: FC<NavChatsProps> = ({
                 onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                   if (e.key === "Enter") {
                     handleSaveRename(chat.id);
+                  }
+                  if (e.key === "Escape") {
+                    setRenameChatId(null);
+                    setRenameChat("");
                   }
                 }}
                 onBlur={() => handleSaveRename(chat.id)}

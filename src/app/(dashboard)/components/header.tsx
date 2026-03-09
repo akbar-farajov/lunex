@@ -11,8 +11,8 @@ interface HeaderProps {
 
 export const Header: FC<HeaderProps> = ({ leftContent, rightContent }) => {
   return (
-    <div className="flex items-center justify-between h-12 shrink-0 px-4">
-      <div className="flex items-center justify-between gap-2 w-full">
+    <header className="flex items-center justify-between h-12 shrink-0 px-4">
+      <nav className="flex items-center justify-between gap-2 w-full" aria-label="Chat header">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="md:hidden" />
           {leftContent}
@@ -31,8 +31,8 @@ export const Header: FC<HeaderProps> = ({ leftContent, rightContent }) => {
             </Link>
           </Button>
         )}
-      </div>
-    </div>
+      </nav>
+    </header>
   );
 };
 

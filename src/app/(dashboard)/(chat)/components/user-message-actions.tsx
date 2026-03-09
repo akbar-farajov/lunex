@@ -35,7 +35,11 @@ const PureUserMessageActions: FC<UserMessageActionsProps> = ({
   }, [handleCopy, textContent, messageId]);
 
   return (
-    <Actions className="flex justify-end w-full opacity-0 group-hover:opacity-100 transition-opacity">
+    <Actions
+      className="flex justify-end w-full opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity"
+      role="toolbar"
+      aria-label="Message actions"
+    >
       <Action label="Copy" tooltip="Copy" variant="ghost" onClick={onCopyClick}>
         {copiedId === messageId ? (
           <CheckIcon className="size-4" />

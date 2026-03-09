@@ -1,4 +1,4 @@
-import { FC, memo } from "react";
+import { FC, memo, useRef, useEffect, useState } from "react";
 import { Conversation } from "@/components/ai-elements/conversation";
 import { ConversationContent } from "@/components/ai-elements/conversation";
 import { ConversationEmptyState } from "@/components/ai-elements/conversation";
@@ -55,6 +55,30 @@ export const PureMessages: FC<PureMessagesProps> = ({
 }) => {
   const chatStatus = useChatStatus();
   const messages = useChatMessages<ChatMessage>();
+  const prevMessageCount = useRef(messages.length);
+  const [statusAnnouncement, setStatusAnnouncement] = useState("");
+
+  useEffect(() => {
+    if (messages.length > prevMessageCount.current) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage?.role === "assistant") {
+        setStatusAnnouncement("AI response received");
+      } else if (lastMessage?.role === "user") {
+        setStatusAnnouncement("Message sent");
+      }
+      const timer = setTimeout(() => setStatusAnnouncement(""), 3000);
+      return () => clearTimeout(timer);
+    }
+    prevMessageCount.current = messages.length;
+  }, [messages.length, messages]);
+
+  useEffect(() => {
+    if (chatStatus === "submitted") {
+      setStatusAnnouncement("AI is generating a response…");
+    } else if (chatStatus === "streaming") {
+      setStatusAnnouncement("AI response is streaming");
+    }
+  }, [chatStatus]);
 
   const isLastMessageStreaming = (index: number) => {
     return (
@@ -68,47 +92,59 @@ export const PureMessages: FC<PureMessagesProps> = ({
   const isEmpty = !showSkeleton && messages.length === 0;
 
   return (
-    <Conversation className="w-full flex-1 scroll-smooth">
-      <ConversationContent
-        className={cn(
-          "max-w-3xl mx-auto",
-          isEmpty && "min-h-full flex items-center justify-center"
-        )}
+    <>
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
       >
-        {showSkeleton ? (
-          <div className="space-y-6 py-6">
-            <MessageSkeleton isUser={true} />
-            <MessageSkeleton isUser={false} />
-            <MessageSkeleton isUser={true} />
-          </div>
-        ) : messages.length === 0 ? (
-          <ConversationEmptyState
-            icon={<MessageSquareIcon className="size-6" />}
-            title={`How can I help, ${profile?.full_name ?? "User"}?`}
-            description={`Ask me anything about the documents you upload.`}
-          />
-        ) : (
-          messages.map((message, index) => {
-            const key = `${message.role}-${message.id || index}-${index}`;
-            if (message.role === "user") {
-              return <UserMessage key={key} message={message} />;
-            }
-            return (
-              <AIMessage
-                key={key}
-                message={message}
-                isStreaming={isLastMessageStreaming(index)}
-              />
-            );
-          })
-        )}
-        {chatStatus === "submitted" && (
-          <Shimmer duration={1}>Generating your response...</Shimmer>
-        )}
-        {chatStatus === "streaming" && <Loader />}
-      </ConversationContent>
-      <ConversationScrollButton />
-    </Conversation>
+        {statusAnnouncement}
+      </div>
+      <Conversation className="w-full flex-1 scroll-smooth" aria-label="Chat messages">
+        <ConversationContent
+          className={cn(
+            "max-w-3xl mx-auto",
+            isEmpty && "min-h-full flex items-center justify-center"
+          )}
+        >
+          {showSkeleton ? (
+            <div className="space-y-6 py-6">
+              <MessageSkeleton isUser={true} />
+              <MessageSkeleton isUser={false} />
+              <MessageSkeleton isUser={true} />
+            </div>
+          ) : messages.length === 0 ? (
+            <ConversationEmptyState
+              icon={<MessageSquareIcon className="size-6" />}
+              title={`How can I help, ${profile?.full_name ?? "User"}?`}
+              description={`Ask me anything about the documents you upload.`}
+            />
+          ) : (
+            <div aria-live="polite" aria-relevant="additions">
+              {messages.map((message, index) => {
+                const key = `${message.role}-${message.id || index}-${index}`;
+                if (message.role === "user") {
+                  return <UserMessage key={key} message={message} />;
+                }
+                return (
+                  <AIMessage
+                    key={key}
+                    message={message}
+                    isStreaming={isLastMessageStreaming(index)}
+                  />
+                );
+              })}
+            </div>
+          )}
+          {chatStatus === "submitted" && (
+            <Shimmer duration={1}>Generating your response...</Shimmer>
+          )}
+          {chatStatus === "streaming" && <Loader />}
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
+    </>
   );
 };
 

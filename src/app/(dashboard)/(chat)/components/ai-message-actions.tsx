@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { Action } from "@/components/ai-elements/actions";
 import { Actions } from "@/components/ai-elements/actions";
-import { Button } from "@/components/ui/button";
 import { useChatActions } from "@ai-sdk-tools/store";
 import { useSpeechSynthesis } from "@/hooks/use-speech-synthesis";
 import { cleanTextForSpeech } from "@/lib/text-utils";
@@ -55,8 +54,14 @@ const PureAIMessageActions: FC<AIMessageActionsProps> = ({
     handleCopy(textContent, messageId);
   }, [handleCopy, textContent, messageId]);
 
+  const speakLabel = isSpeaking ? "Stop speaking" : "Read aloud";
+
   return (
-    <Actions className="flex justify-start w-full opacity-0 group-hover:opacity-100 transition-opacity">
+    <Actions
+      className="flex justify-start w-full opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity"
+      role="toolbar"
+      aria-label="Message actions"
+    >
       <Action label="Copy" tooltip="Copy" variant="ghost" onClick={onCopyClick}>
         {copiedId === messageId ? (
           <CheckIcon className="size-4" />
@@ -64,18 +69,18 @@ const PureAIMessageActions: FC<AIMessageActionsProps> = ({
           <CopyIcon className="size-4" />
         )}
       </Action>
-      <Button
-        size="icon"
+      <Action
+        label={speakLabel}
+        tooltip={speakLabel}
         variant="ghost"
         onClick={handleSpeak}
-        className="size-8 rounded-lg text-muted-foreground"
       >
         {isSpeaking ? (
           <SquareIcon className="size-4" />
         ) : (
           <Volume2Icon className="size-4" />
         )}
-      </Button>
+      </Action>
       <Action
         label="Regenerate"
         tooltip="Regenerate"

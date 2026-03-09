@@ -301,7 +301,7 @@ export function PromptInputAttachment({
           width={56}
         />
       ) : (
-        <div className="flex size-full max-w-full cursor-pointer items-center justify-start gap-2 overflow-hidden px-2 text-muted-foreground">
+        <div className="flex size-full max-w-full items-center justify-start gap-2 overflow-hidden px-2 text-muted-foreground">
           <PaperclipIcon className="size-4 shrink-0" />
           <Tooltip delayDuration={400}>
             <TooltipTrigger className="min-w-0 flex-1">
@@ -906,6 +906,7 @@ export const PromptInputTextarea = ({
     <InputGroupTextarea
       className={cn("field-sizing-content max-h-48 min-h-16", className)}
       name="message"
+      aria-label={placeholder}
       onCompositionEnd={() => setIsComposing(false)}
       onCompositionStart={() => setIsComposing(true)}
       onKeyDown={handleKeyDown}
@@ -993,7 +994,7 @@ export const PromptInputActionMenuTrigger = ({
   ...props
 }: PromptInputActionMenuTriggerProps) => (
   <DropdownMenuTrigger asChild>
-    <PromptInputButton className={className} {...props}>
+    <PromptInputButton className={className} aria-label="Open attachment menu" {...props}>
       {children ?? <PlusIcon className="size-4" />}
     </PromptInputButton>
   </DropdownMenuTrigger>
@@ -1047,9 +1048,15 @@ export const PromptInputSubmit = ({
   const buttonType = isStreaming ? "button" : "submit";
   const handleClick = isStreaming ? onStop : undefined;
 
+  const submitLabel = isStreaming
+    ? "Stop generating"
+    : status === "submitted"
+      ? "Sending message…"
+      : "Send message";
+
   return (
     <InputGroupButton
-      aria-label="Submit"
+      aria-label={submitLabel}
       className={cn(className)}
       size={size}
       type={buttonType}
@@ -1215,6 +1222,8 @@ export const PromptInputSpeechButton = ({
       )}
       disabled={!recognition}
       onClick={toggleListening}
+      aria-label={isListening ? "Stop voice input" : "Start voice input"}
+      aria-pressed={isListening}
       {...props}
     >
       <MicIcon className="size-4" />
