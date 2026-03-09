@@ -1,98 +1,70 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useCallback } from "react";
+import {
+  useSpeechSynthesis,
+  type SpeechPlaybackStatus,
+} from "@/hooks/use-speech-synthesis";
 
-const STORAGE_KEY = "welcome-speech-played";
+export type InstructionStatus =
+  | "ready"
+  | "playing"
+  | "stopped"
+  | "failed"
+  | "unsupported";
 
 interface UseWelcomeSpeechOptions {
   text: string;
-  lang?: string;
-  autoPlay?: boolean;
 }
 
 interface UseWelcomeSpeechReturn {
+  status: InstructionStatus;
   isSpeaking: boolean;
   isSupported: boolean;
-  hasPlayed: boolean;
-  replay: () => void;
+  play: () => void;
   stop: () => void;
+}
+
+function toInstructionStatus(s: SpeechPlaybackStatus): InstructionStatus {
+  switch (s) {
+    case "speaking":
+      return "playing";
+    case "blocked":
+      return "failed";
+    case "unsupported":
+      return "unsupported";
+    default:
+      return "ready";
+  }
 }
 
 export function useWelcomeSpeech({
   text,
-  lang = "en-US",
-  autoPlay = true,
 }: UseWelcomeSpeechOptions): UseWelcomeSpeechReturn {
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isSupported, setIsSupported] = useState(false);
-  const [hasPlayed, setHasPlayed] = useState(false);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const didAutoPlayRef = useRef(false);
+  const {
+    status: playbackStatus,
+    speak,
+    stop: stopSpeech,
+  } = useSpeechSynthesis();
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    setIsSupported("speechSynthesis" in window);
-    setHasPlayed(sessionStorage.getItem(STORAGE_KEY) === "true");
-  }, []);
+  const isSupported =
+    typeof window !== "undefined" && "speechSynthesis" in window;
 
-  const speakText = useCallback(() => {
-    if (!isSupported) return;
+  const status = toInstructionStatus(playbackStatus);
 
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang;
-    utterance.rate = 0.95;
-
-    const voices = window.speechSynthesis.getVoices();
-    const azVoice = voices.find((v) => v.lang.startsWith("az"));
-    if (azVoice) utterance.voice = azVoice;
-
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-    setIsSpeaking(true);
-
-    sessionStorage.setItem(STORAGE_KEY, "true");
-    setHasPlayed(true);
-  }, [text, lang, isSupported]);
-
-  useEffect(() => {
-    if (!autoPlay || !isSupported || didAutoPlayRef.current) return;
-    if (sessionStorage.getItem(STORAGE_KEY) === "true") return;
-
-    didAutoPlayRef.current = true;
-
-    const voices = window.speechSynthesis.getVoices();
-    if (voices.length > 0) {
-      speakText();
-    } else {
-      const onVoicesChanged = () => {
-        speakText();
-        window.speechSynthesis.onvoiceschanged = null;
-      };
-      window.speechSynthesis.onvoiceschanged = onVoicesChanged;
-    }
-  }, [autoPlay, isSupported, speakText]);
-
-  useEffect(() => {
-    return () => {
-      window.speechSynthesis?.cancel();
-    };
-  }, []);
-
-  const replay = useCallback(() => {
-    speakText();
-  }, [speakText]);
+  const play = useCallback(() => {
+    speak(text);
+  }, [text, speak]);
 
   const stop = useCallback(() => {
-    if (!isSupported) return;
-    window.speechSynthesis.cancel();
-    setIsSpeaking(false);
-  }, [isSupported]);
+    stopSpeech();
+  }, [stopSpeech]);
 
-  return { isSpeaking, isSupported, hasPlayed, replay, stop };
+  return {
+    status,
+    isSpeaking: status === "playing",
+    isSupported,
+    play,
+    stop,
+  };
 }

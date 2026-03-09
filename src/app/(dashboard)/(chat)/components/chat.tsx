@@ -1,8 +1,15 @@
 "use client";
-import { FC, useState, useEffect, useRef } from "react";
-import { useChat } from "@ai-sdk-tools/store";
+import { FC, useState, useEffect, useRef, useCallback } from "react";
+import {
+  useChat,
+  useChatStatus,
+  useChatMessages,
+} from "@ai-sdk-tools/store";
 import { Messages } from "@/app/(dashboard)/(chat)/components/messages";
-import { ChatComposer } from "@/app/(dashboard)/(chat)/components/chat-composer";
+import {
+  ChatComposer,
+  type ChatComposerHandle,
+} from "@/app/(dashboard)/(chat)/components/chat-composer";
 import { DefaultChatTransport } from "ai";
 import type { Profile } from "@/lib/types";
 import { createChat } from "@/actions/chat";
@@ -15,7 +22,19 @@ import { getChatHistoryKey } from "@/hooks/use-chats";
 import { Header } from "@/app/(dashboard)/components";
 import { usePathname } from "next/navigation";
 import { useChatStoreApi } from "@ai-sdk-tools/store";
-import { WelcomeInstructions } from "./welcome-instructions";
+import {
+  WelcomeInstructions,
+  type WelcomeInstructionsHandle,
+} from "./welcome-instructions";
+import { VoiceStatusBar } from "./voice-flow-controls";
+import { ShortcutHelp } from "./shortcut-help";
+import {
+  useVoiceFlow,
+  type VoiceFlowStatus,
+} from "@/hooks/use-auto-voice-flow";
+import type { PushToTalkEvent } from "@/hooks/use-push-to-talk";
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { cleanTextForSpeech } from "@/lib/text-utils";
 
 interface ChatProps {
   chatId?: string;
@@ -43,6 +62,10 @@ export const Chat: FC<ChatProps> = ({
   const pendingMessageRef = useRef<PromptInputMessage | null>(null);
   const pathname = usePathname();
   const storeApi = useChatStoreApi();
+
+  const instructionsRef = useRef<WelcomeInstructionsHandle>(null);
+  const composerRef = useRef<ChatComposerHandle>(null);
+  const responseUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
     if (pathname === "/new" || pathname === "/new/") {
@@ -115,9 +138,6 @@ export const Chat: FC<ChatProps> = ({
     }),
 
     onData(event) {
-      // if (event.type === "data-usage") {
-      //   console.log((event.data as any).outputTokens);
-      // }
       if (event.type === "data-title") {
         setTitle(event.data as string);
         mutate(getChatHistoryKey());
@@ -146,9 +166,7 @@ export const Chat: FC<ChatProps> = ({
     const hasText = Boolean(data.text?.trim());
     const hasFiles = (data.files?.length ?? 0) > 0;
 
-    if (!hasText && !hasFiles) {
-      return;
-    }
+    if (!hasText && !hasFiles) return;
 
     if (!currentChatId) {
       setIsCreatingChat(true);
@@ -171,6 +189,95 @@ export const Chat: FC<ChatProps> = ({
     stop();
   };
 
+  const chatStatus = useChatStatus();
+  const messages = useChatMessages<ChatMessage>();
+  const { voiceStatus, setVoiceStatus } = useVoiceFlow({ chatStatus });
+
+  const lastAssistantText = (() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "assistant") {
+        return messages[i].parts
+          .map((p) => (p.type === "text" ? p.text : ""))
+          .join("\n");
+      }
+    }
+    return "";
+  })();
+  const lastAssistantTextRef = useRef(lastAssistantText);
+  lastAssistantTextRef.current = lastAssistantText;
+
+  const handleSubmitRef = useRef(handleSubmit);
+  handleSubmitRef.current = handleSubmit;
+
+  const handleVoiceSubmit = useCallback((text: string) => {
+    handleSubmitRef.current({ text });
+  }, []);
+
+  const handleVoiceStatusChange = useCallback(
+    (event: PushToTalkEvent, error?: string | null) => {
+      const statusMap: Record<PushToTalkEvent, VoiceFlowStatus | null> = {
+        listening: "Listening...",
+        stopped: "Recording stopped.",
+        submitting: "Submitting message...",
+        idle: null,
+        error:
+          error === "not-allowed"
+            ? "Microphone permission is required."
+            : "Speech recognition failed.",
+      };
+      const mapped = statusMap[event];
+      if (mapped) setVoiceStatus(mapped);
+    },
+    [setVoiceStatus]
+  );
+
+  const playLatestResponse = useCallback(() => {
+    const text = lastAssistantTextRef.current;
+    if (!text) return;
+
+    window.speechSynthesis.cancel();
+    responseUtteranceRef.current = null;
+
+    const cleaned = cleanTextForSpeech(text);
+    if (!cleaned) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleaned);
+    responseUtteranceRef.current = utterance;
+
+    utterance.onstart = () => setVoiceStatus("Playing response...");
+    utterance.onend = () => {
+      setVoiceStatus("");
+      responseUtteranceRef.current = null;
+    };
+    utterance.onerror = (e) => {
+      if (e.error !== "interrupted" && e.error !== "canceled") {
+        setVoiceStatus("");
+      }
+      responseUtteranceRef.current = null;
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }, [setVoiceStatus]);
+
+  const stopAllSpeech = useCallback(() => {
+    window.speechSynthesis.cancel();
+    setVoiceStatus("");
+  }, [setVoiceStatus]);
+
+  useEffect(() => {
+    return () => {
+      responseUtteranceRef.current = null;
+    };
+  }, []);
+
+  useKeyboardShortcuts({
+    i: () => instructionsRef.current?.play(),
+    x: stopAllSpeech,
+    r: () => composerRef.current?.toggleRecording(),
+    p: playLatestResponse,
+    s: () => composerRef.current?.focusInput(),
+  });
+
   return (
     <main className="flex flex-col h-full" aria-label="Chat">
       <Header
@@ -180,11 +287,16 @@ export const Chat: FC<ChatProps> = ({
           ) : undefined
         }
       />
-      <WelcomeInstructions />
+      <WelcomeInstructions ref={instructionsRef} />
+      <ShortcutHelp />
+      <VoiceStatusBar voiceStatus={voiceStatus} />
       <Messages profile={profile} chatId={initialChatId} />
       <div className="px-2">
         <ChatComposer
+          ref={composerRef}
           onSubmit={handleSubmit}
+          onVoiceSubmit={handleVoiceSubmit}
+          onVoiceStatusChange={handleVoiceStatusChange}
           setInput={setInput}
           input={input}
           isCreatingChat={isCreatingChat}

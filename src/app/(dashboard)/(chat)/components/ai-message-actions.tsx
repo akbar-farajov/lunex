@@ -54,7 +54,7 @@ const PureAIMessageActions: FC<AIMessageActionsProps> = ({
     handleCopy(textContent, messageId);
   }, [handleCopy, textContent, messageId]);
 
-  const speakLabel = isSpeaking ? "Stop speaking" : "Read aloud";
+  const speakLabel = isSpeaking ? "Stop response" : "Listen to response";
 
   return (
     <Actions

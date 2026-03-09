@@ -1,29 +1,47 @@
-import { useState, useEffect } from "react";
+"use client";
+
+import { useState, useEffect, useRef, useCallback } from "react";
+
+export type SpeechPlaybackStatus =
+  | "idle"
+  | "speaking"
+  | "blocked"
+  | "unsupported";
 
 interface UseSpeechSynthesisReturn {
   isSpeaking: boolean;
+  status: SpeechPlaybackStatus;
   selectedVoice: SpeechSynthesisVoice | null;
   speak: (text: string) => void;
   stop: () => void;
 }
 
+function getVoices(): SpeechSynthesisVoice[] {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return [];
+  return window.speechSynthesis.getVoices();
+}
+
+function isSupported(): boolean {
+  return typeof window !== "undefined" && "speechSynthesis" in window;
+}
+
 export function useSpeechSynthesis(): UseSpeechSynthesisReturn {
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [status, setStatus] = useState<SpeechPlaybackStatus>(
+    isSupported() ? "idle" : "unsupported"
+  );
   const [selectedVoice, setSelectedVoice] =
     useState<SpeechSynthesisVoice | null>(null);
 
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
   useEffect(() => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-      return;
-    }
+    if (!isSupported()) return;
 
     const loadVoices = () => {
-      const availableVoices = window.speechSynthesis.getVoices();
-
-      if (availableVoices.length > 1 && !selectedVoice) {
-        setSelectedVoice(availableVoices[1]);
-      } else if (availableVoices.length > 0 && !selectedVoice) {
-        setSelectedVoice(availableVoices[0]);
+      const voices = getVoices();
+      if (voices.length > 0 && !selectedVoice) {
+        const english = voices.find((v) => v.lang.startsWith("en") && v.default);
+        setSelectedVoice(english ?? voices[0]);
       }
     };
 
@@ -37,45 +55,53 @@ export function useSpeechSynthesis(): UseSpeechSynthesisReturn {
 
   useEffect(() => {
     return () => {
-      if (typeof window !== "undefined" && "speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
+      if (isSupported()) window.speechSynthesis.cancel();
     };
   }, []);
 
-  const speak = (text: string) => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-      return;
-    }
+  const speak = useCallback(
+    (text: string) => {
+      if (!isSupported()) return;
 
-    if (isSpeaking) {
       window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      return;
-    }
+      utteranceRef.current = null;
 
-    const utterance = new SpeechSynthesisUtterance(text);
+      const utterance = new SpeechSynthesisUtterance(text);
+      if (selectedVoice) utterance.voice = selectedVoice;
 
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-    }
+      utteranceRef.current = utterance;
 
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+      utterance.onstart = () => setStatus("speaking");
 
-    window.speechSynthesis.speak(utterance);
-    setIsSpeaking(true);
-  };
+      utterance.onend = () => {
+        setStatus("idle");
+        utteranceRef.current = null;
+      };
 
-  const stop = () => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-    }
-  };
+      utterance.onerror = (e) => {
+        if (e.error === "interrupted" || e.error === "canceled") {
+          setStatus("idle");
+        } else {
+          setStatus("blocked");
+        }
+        utteranceRef.current = null;
+      };
+
+      window.speechSynthesis.speak(utterance);
+    },
+    [selectedVoice]
+  );
+
+  const stop = useCallback(() => {
+    if (!isSupported()) return;
+    window.speechSynthesis.cancel();
+    setStatus("idle");
+    utteranceRef.current = null;
+  }, []);
 
   return {
-    isSpeaking,
+    isSpeaking: status === "speaking",
+    status,
     selectedVoice,
     speak,
     stop,
