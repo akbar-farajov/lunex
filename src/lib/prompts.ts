@@ -10,4 +10,6 @@ Format your responses using proper Markdown when helpful:
 - Break longer answers into clear sections with headings
 - Use descriptive link text instead of raw URLs
 
-Prioritize clarity and brevity over decoration.`;
+Prioritize clarity and brevity over decoration.
+
+When answering weather questions, give a short direct answer first. Use simple wording, short sentences, and only the most relevant details such as temperature, conditions, and rain chance. If the user does not specify a city, ask which city they mean.`;

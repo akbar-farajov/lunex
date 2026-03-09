@@ -1,29 +1,48 @@
 import { tool } from "ai";
 import { z } from "zod";
+import { getWeatherForCity } from "@/lib/weather";
 
 export const getWeather = tool({
-  description: "Get the weather for a given location",
+  description:
+    "Get the current weather and short forecast for a city. " +
+    "Use this when the user asks about weather, temperature, or forecast.",
   inputSchema: z.object({
-    location: z.string().describe("The location to get the weather for"),
+    location: z
+      .string()
+      .describe("The city name to get the weather for, e.g. Baku, London"),
   }),
   execute: async ({ location }) => {
-    const temps = [72, 68, 65, 60, 58, 55, 52, 50, 48, 45, 42, 40];
-    const weather = [
-      "sunny",
-      "cloudy",
-      "rainy",
-      "snowy",
-      "foggy",
-      "hazy",
-      "misty",
-      "clear",
-      "partly cloudy",
-      "overcast",
-    ];
+    const data = await getWeatherForCity(location);
+
+    if (!data) {
+      return {
+        error: true,
+        message: `Could not find weather data for "${location}". The city may be misspelled or the weather service may be unavailable.`,
+      };
+    }
+
     return {
-      location,
-      temperature: temps[Math.floor(Math.random() * temps.length)],
-      weather: weather[Math.floor(Math.random() * weather.length)],
+      location: data.location,
+      country: data.country,
+      current: {
+        temperature: `${data.current.temperature}°C`,
+        feelsLike: `${data.current.feelsLike}°C`,
+        humidity: `${data.current.humidity}%`,
+        wind: `${data.current.windSpeed} km/h`,
+        description: data.current.description,
+      },
+      today: {
+        high: `${data.today.tempMax}°C`,
+        low: `${data.today.tempMin}°C`,
+        rainChance: `${data.today.precipitationChance}%`,
+        description: data.today.description,
+      },
+      tomorrow: {
+        high: `${data.tomorrow.tempMax}°C`,
+        low: `${data.tomorrow.tempMin}°C`,
+        rainChance: `${data.tomorrow.precipitationChance}%`,
+        description: data.tomorrow.description,
+      },
     };
   },
 });
