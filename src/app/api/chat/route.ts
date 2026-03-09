@@ -23,17 +23,17 @@ import {
   checkDailyUsageLimit,
   updateDailyTokenCount,
 } from "@/actions/usage";
-import { providers } from "@/lib/ai/providers";
-import { models } from "@/lib/ai/models";
+import { google } from "@ai-sdk/google";
+// import { models } from "@/lib/ai/models";
 
 const tools = getTools();
 
 export const maxDuration = 30;
 
-function getProviderForModel(modelId: string): string {
-  const model = models.find((m) => m.id === modelId);
-  return model?.provider || "google";
-}
+// function getProviderForModel(modelId: string): string {
+//   const model = models.find((m) => m.id === modelId);
+//   return model?.provider || "google";
+// }
 
 export async function POST(req: Request) {
   const {
@@ -41,13 +41,13 @@ export async function POST(req: Request) {
     id,
     trigger,
     messageId,
-    modelId,
+    // modelId,
   }: {
     message: ChatMessage;
     id: string;
     trigger: "submit-message" | "regenerate-message";
     messageId: string;
-    modelId?: string;
+    // modelId?: string;
   } = await req.json();
 
   const chat = await getChatById(id);
@@ -103,15 +103,15 @@ export async function POST(req: Request) {
     return new Response("No messages found", { status: 404 });
   }
 
-  const selectedModelId = modelId || "gemini-2.5-flash-lite";
-  const providerModelId = `${getProviderForModel(
-    selectedModelId
-  )}:${selectedModelId}` as const;
+  // const selectedModelId = modelId || "gemini-2.5-flash-lite";
+  // const providerModelId = `${getProviderForModel(
+  //   selectedModelId
+  //     )}:${selectedModelId}` as const;
 
   const stream = createUIMessageStream({
     execute: async ({ writer }) => {
       const result = streamText({
-        model: providers.languageModel(providerModelId as any),
+        model: google("gemini-2.5-flash"),
         system: SYSTEM_PROMPT,
         messages: convertToModelMessages(messages),
         tools,
@@ -121,7 +121,7 @@ export async function POST(req: Request) {
           await createUsage({
             chatId: id,
             usage,
-            modelId: selectedModelId,
+            modelId: "gemini-2.5-flash",
           });
 
           const totalTokens = usage.totalTokens || 0;

@@ -73,10 +73,10 @@ export const PureChatComposer: FC<PureChatComposerProps> = ({
               <PromptInputActionAddAttachments />
             </PromptInputActionMenuContent>
           </PromptInputActionMenu>
-          <ChatModelSelector
+          {/* <ChatModelSelector
             selectedModel={selectedModel}
             onModelChange={onModelChange}
-          />
+          /> */}
         </PromptInputTools>
         <PromptInputSubmit
           disabled={!input.trim() && chatStatus !== "streaming"}
