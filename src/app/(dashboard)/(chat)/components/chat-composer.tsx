@@ -15,8 +15,8 @@ import {
   PromptInputAttachment,
   PromptInputMessage,
 } from "@/components/ai-elements/prompt-input";
-import { FC, memo, useRef, useEffect } from "react";
-import { ChatModelSelector } from "./chat-model-selector";
+import { FC, memo, useRef, useEffect, useCallback } from "react";
+import { SpeechInputButton } from "./speech-input-button";
 
 interface PureChatComposerProps {
   onSubmit: (data: PromptInputMessage) => void;
@@ -47,6 +47,19 @@ export const PureChatComposer: FC<PureChatComposerProps> = ({
     }
   }, []);
 
+  const handleSpeechTranscript = useCallback(
+    (text: string) => {
+      const current = textareaRef.current?.value ?? input;
+      const next = current ? `${current} ${text}` : text;
+      setInput(next);
+      textareaRef.current?.focus();
+    },
+    [setInput, input]
+  );
+
+  const isActive =
+    chatStatus === "streaming" || chatStatus === "submitted" || isCreatingChat;
+
   return (
     <PromptInput
       onSubmit={onSubmit}
@@ -73,10 +86,10 @@ export const PureChatComposer: FC<PureChatComposerProps> = ({
               <PromptInputActionAddAttachments />
             </PromptInputActionMenuContent>
           </PromptInputActionMenu>
-          {/* <ChatModelSelector
-            selectedModel={selectedModel}
-            onModelChange={onModelChange}
-          /> */}
+          <SpeechInputButton
+            onTranscript={handleSpeechTranscript}
+            disabled={isActive}
+          />
         </PromptInputTools>
         <PromptInputSubmit
           disabled={!input.trim() && chatStatus !== "streaming"}
