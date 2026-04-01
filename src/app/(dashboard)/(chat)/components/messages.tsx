@@ -14,6 +14,7 @@ import { useChatMessages, useChatStatus, useChatId } from "@ai-sdk-tools/store";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import { cn } from "@/lib/utils";
+import { AZ } from "@/lib/az-strings";
 
 interface PureMessagesProps {
   profile?: Profile;
@@ -26,21 +27,21 @@ const MessageSkeleton = ({ isUser = false }: { isUser?: boolean }) => {
     <Message from={isUser ? "user" : "assistant"}>
       {isUser ? (
         <MessageContent variant="flat">
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-64" />
-            <Skeleton className="h-4 w-48" />
+          <div className="space-y-3">
+            <Skeleton className="h-5 w-64" />
+            <Skeleton className="h-5 w-48" />
           </div>
         </MessageContent>
       ) : (
         <MessageContent variant="flat">
-          <div className="flex items-center gap-2 mb-2">
-            <Skeleton className="h-8 w-8 rounded-full" />
-            <Skeleton className="h-4 w-16" />
+          <div className="flex items-center gap-2 mb-3">
+            <Skeleton className="h-9 w-9 rounded-full" />
+            <Skeleton className="h-5 w-16" />
           </div>
           <div className="space-y-3">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-3/4" />
           </div>
         </MessageContent>
       )}
@@ -62,9 +63,9 @@ export const PureMessages: FC<PureMessagesProps> = ({
     if (messages.length > prevMessageCount.current) {
       const lastMessage = messages[messages.length - 1];
       if (lastMessage?.role === "assistant") {
-        setStatusAnnouncement("AI response received");
+        setStatusAnnouncement(AZ.messageStatus.aiReceived);
       } else if (lastMessage?.role === "user") {
-        setStatusAnnouncement("Message sent");
+        setStatusAnnouncement(AZ.messageStatus.messageSent);
       }
       const timer = setTimeout(() => setStatusAnnouncement(""), 3000);
       return () => clearTimeout(timer);
@@ -74,9 +75,9 @@ export const PureMessages: FC<PureMessagesProps> = ({
 
   useEffect(() => {
     if (chatStatus === "submitted") {
-      setStatusAnnouncement("AI is generating a response…");
+      setStatusAnnouncement(AZ.messageStatus.generating);
     } else if (chatStatus === "streaming") {
-      setStatusAnnouncement("AI response is streaming");
+      setStatusAnnouncement(AZ.messageStatus.streaming);
     }
   }, [chatStatus]);
 
@@ -101,7 +102,7 @@ export const PureMessages: FC<PureMessagesProps> = ({
       >
         {statusAnnouncement}
       </div>
-      <Conversation className="w-full flex-1 scroll-smooth" aria-label="Chat messages">
+      <Conversation className="w-full flex-1 scroll-smooth" aria-label="Söhbət mesajları">
         <ConversationContent
           className={cn(
             "max-w-3xl mx-auto",
@@ -116,9 +117,9 @@ export const PureMessages: FC<PureMessagesProps> = ({
             </div>
           ) : messages.length === 0 ? (
             <ConversationEmptyState
-              icon={<MessageSquareIcon className="size-6" />}
-              title={`How can I help, ${profile?.full_name ?? "User"}?`}
-              description={`Ask me anything about the documents you upload.`}
+              icon={<MessageSquareIcon className="size-7" />}
+              title={AZ.emptyState.title(profile?.full_name ?? "İstifadəçi")}
+              description={AZ.emptyState.description}
             />
           ) : (
             <div aria-live="polite" aria-relevant="additions">
@@ -138,7 +139,7 @@ export const PureMessages: FC<PureMessagesProps> = ({
             </div>
           )}
           {chatStatus === "submitted" && (
-            <Shimmer duration={1}>Generating your response...</Shimmer>
+            <Shimmer duration={1}>Cavab yaradılır...</Shimmer>
           )}
           {chatStatus === "streaming" && <Loader />}
         </ConversationContent>

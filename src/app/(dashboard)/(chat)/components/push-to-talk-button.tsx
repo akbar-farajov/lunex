@@ -7,6 +7,7 @@ import {
   usePushToTalk,
   type PushToTalkEvent,
 } from "@/hooks/use-push-to-talk";
+import { AZ } from "@/lib/az-strings";
 
 interface PushToTalkButtonProps {
   onSubmit: (text: string) => void;
@@ -87,13 +88,13 @@ export const PushToTalkButton = forwardRef<
   const showInterim = isListening && interimTranscript;
 
   const announcement = isListening
-    ? "Listening. Speak now."
+    ? AZ.pushToTalk.announcement.listening
     : isProcessing
-      ? "Processing speech."
+      ? AZ.pushToTalk.announcement.processing
       : "";
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-3">
       <button
         type="button"
         disabled={disabled}
@@ -103,30 +104,30 @@ export const PushToTalkButton = forwardRef<
         onPointerLeave={handleRelease}
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
-        aria-label="Hold to record a voice message, or press Alt+R to toggle recording."
+        aria-label={AZ.pushToTalk.ariaLabel}
         className={cn(
-          "relative inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium transition-all select-none touch-none",
-          "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+          "relative inline-flex items-center gap-2.5 rounded-full px-4 py-2.5 text-sm font-medium transition-all select-none touch-none min-h-11",
+          "focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-ring",
           isListening
             ? "bg-destructive/10 text-destructive scale-[1.03]"
             : "bg-muted text-muted-foreground hover:bg-muted/80",
           disabled && "opacity-50 cursor-not-allowed"
         )}
       >
-        <MicIcon className={cn("size-4", isListening && "animate-pulse")} />
+        <MicIcon className={cn("size-5", isListening && "animate-pulse")} />
         {isListening
-          ? "Listening..."
+          ? AZ.pushToTalk.listening
           : isProcessing
-            ? "Processing..."
-            : "Hold to speak"}
+            ? AZ.pushToTalk.processing
+            : AZ.pushToTalk.holdToSpeak}
         {isListening && (
-          <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-destructive animate-pulse" />
+          <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-destructive animate-pulse" />
         )}
       </button>
 
       {showInterim && (
         <span
-          className="max-w-48 truncate text-xs text-muted-foreground italic"
+          className="max-w-48 truncate text-sm text-muted-foreground italic"
           aria-hidden="true"
         >
           {interimTranscript}
@@ -134,7 +135,7 @@ export const PushToTalkButton = forwardRef<
       )}
 
       {error && errorMessage && (
-        <span className="text-xs text-destructive" role="alert">
+        <span className="text-sm text-destructive" role="alert">
           {errorMessage}
         </span>
       )}

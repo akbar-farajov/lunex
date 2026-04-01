@@ -74,7 +74,7 @@ const ChatComposerInner = forwardRef<ChatComposerHandle, ChatComposerProps>(
       <PromptInput
         onSubmit={onSubmit}
         multiple={true}
-        className="w-full max-w-3xl mx-auto mb-4 shadow-xs bg-background rounded-lg border-none"
+        className="w-full max-w-3xl mx-auto mb-4 shadow-xs bg-background rounded-lg border-none text-base"
       >
         <PromptInputBody className="w-full flex flex-row items-center justify-between">
           <div className="flex w-full flex-col items-start justify-start">

@@ -1,17 +1,14 @@
 "use client";
 
 import { useCallback } from "react";
-import {
-  useSpeechSynthesis,
-  type SpeechPlaybackStatus,
-} from "@/hooks/use-speech-synthesis";
+import { useVoicePlayback, type VoicePlaybackStatus } from "@/hooks/use-voice-playback";
 
 export type InstructionStatus =
   | "ready"
+  | "loading"
   | "playing"
   | "stopped"
-  | "failed"
-  | "unsupported";
+  | "failed";
 
 interface UseWelcomeSpeechOptions {
   text: string;
@@ -20,19 +17,19 @@ interface UseWelcomeSpeechOptions {
 interface UseWelcomeSpeechReturn {
   status: InstructionStatus;
   isSpeaking: boolean;
-  isSupported: boolean;
+  isLoading: boolean;
   play: () => void;
   stop: () => void;
 }
 
-function toInstructionStatus(s: SpeechPlaybackStatus): InstructionStatus {
+function toInstructionStatus(s: VoicePlaybackStatus): InstructionStatus {
   switch (s) {
-    case "speaking":
+    case "loading":
+      return "loading";
+    case "playing":
       return "playing";
-    case "blocked":
+    case "error":
       return "failed";
-    case "unsupported":
-      return "unsupported";
     default:
       return "ready";
   }
@@ -41,29 +38,23 @@ function toInstructionStatus(s: SpeechPlaybackStatus): InstructionStatus {
 export function useWelcomeSpeech({
   text,
 }: UseWelcomeSpeechOptions): UseWelcomeSpeechReturn {
-  const {
-    status: playbackStatus,
-    speak,
-    stop: stopSpeech,
-  } = useSpeechSynthesis();
-
-  const isSupported =
-    typeof window !== "undefined" && "speechSynthesis" in window;
+  const { status: playbackStatus, play: playAudio, stop: stopAudio } =
+    useVoicePlayback();
 
   const status = toInstructionStatus(playbackStatus);
 
   const play = useCallback(() => {
-    speak(text);
-  }, [text, speak]);
+    playAudio(text);
+  }, [text, playAudio]);
 
   const stop = useCallback(() => {
-    stopSpeech();
-  }, [stopSpeech]);
+    stopAudio();
+  }, [stopAudio]);
 
   return {
     status,
     isSpeaking: status === "playing",
-    isSupported,
+    isLoading: status === "loading",
     play,
     stop,
   };

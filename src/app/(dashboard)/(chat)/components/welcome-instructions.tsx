@@ -1,20 +1,10 @@
 "use client";
 
 import { forwardRef, useImperativeHandle } from "react";
-import { Volume2Icon, SquareIcon, InfoIcon } from "lucide-react";
+import { Volume2Icon, SquareIcon, InfoIcon, Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWelcomeSpeech } from "@/hooks/use-welcome-speech";
-
-const INSTRUCTION_TEXT =
-  "Welcome. This platform is an accessible AI assistant designed to support visually impaired users. Press Alt plus I to hear these instructions again. Press Alt plus R to start or stop recording a voice message. Press Alt plus P to hear the latest assistant response. Press Alt plus X to stop speech playback. Press Alt plus S to move to the message input. You can also use the visible buttons on the page for each action.";
-
-const STATUS_LABELS: Record<string, string> = {
-  ready: "Instructions ready.",
-  playing: "Playing instructions...",
-  stopped: "Instructions stopped.",
-  failed: "Instruction playback failed.",
-  unsupported: "Speech synthesis is not supported in this browser.",
-};
+import { AZ } from "@/lib/az-strings";
 
 export interface WelcomeInstructionsHandle {
   play: () => void;
@@ -23,48 +13,55 @@ export interface WelcomeInstructionsHandle {
 
 export const WelcomeInstructions = forwardRef<WelcomeInstructionsHandle>(
   function WelcomeInstructions(_, ref) {
-    const { status, isSpeaking, isSupported, play, stop } = useWelcomeSpeech({
-      text: INSTRUCTION_TEXT,
+    const { status, isSpeaking, isLoading, play, stop } = useWelcomeSpeech({
+      text: AZ.instructions,
     });
 
     useImperativeHandle(ref, () => ({ play, stop }), [play, stop]);
 
-    if (!isSupported) return null;
+    const isActive = isSpeaking || isLoading;
 
     return (
       <div
         role="region"
-        aria-label="Onboarding instructions"
-        className="flex items-center gap-3 px-4 py-2 border-b bg-muted/30"
+        aria-label="Təlimatlar"
+        className="flex items-center gap-4 px-5 py-3 border-b bg-muted/30"
       >
         <InfoIcon
-          className="size-4 shrink-0 text-muted-foreground"
+          className="size-5 shrink-0 text-muted-foreground"
           aria-hidden="true"
         />
 
-        <span className="text-xs text-muted-foreground hidden sm:inline">
-          Listen to a quick guide before using the assistant.
+        <span className="text-sm text-muted-foreground hidden sm:inline leading-relaxed">
+          {AZ.instructionBanner}
         </span>
 
-        {isSpeaking ? (
+        {isActive ? (
           <>
             <Button
               size="sm"
               variant="ghost"
               onClick={stop}
-              aria-label="Stop instructions"
-              className="gap-1.5 text-muted-foreground hover:text-foreground"
+              aria-label={AZ.stopInstructions}
+              className="gap-2 text-sm text-muted-foreground hover:text-foreground min-h-10 px-4"
             >
-              <SquareIcon className="size-4" />
-              <span className="text-xs">Stop instructions</span>
+              <SquareIcon className="size-5" />
+              <span>{AZ.stopInstructions}</span>
             </Button>
 
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Volume2Icon
-                className="size-3.5 animate-pulse"
-                aria-hidden="true"
-              />
-              <span className="hidden sm:inline">Playing...</span>
+            <span className="flex items-center gap-2 text-sm text-muted-foreground">
+              {isLoading ? (
+                <Loader2Icon
+                  className="size-4 animate-spin"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Volume2Icon
+                  className="size-4 animate-pulse"
+                  aria-hidden="true"
+                />
+              )}
+              <span className="hidden sm:inline">{AZ.playing}</span>
             </span>
           </>
         ) : (
@@ -72,11 +69,11 @@ export const WelcomeInstructions = forwardRef<WelcomeInstructionsHandle>(
             size="sm"
             variant="ghost"
             onClick={play}
-            aria-label="Listen to instructions (Alt+I)"
-            className="gap-1.5 text-muted-foreground hover:text-foreground"
+            aria-label={`${AZ.listenInstructions} (Alt+I)`}
+            className="gap-2 text-sm text-muted-foreground hover:text-foreground min-h-10 px-4"
           >
-            <Volume2Icon className="size-4" />
-            <span className="text-xs">Listen to instructions</span>
+            <Volume2Icon className="size-5" />
+            <span>{AZ.listenInstructions}</span>
           </Button>
         )}
 
@@ -86,7 +83,7 @@ export const WelcomeInstructions = forwardRef<WelcomeInstructionsHandle>(
           aria-atomic="true"
           className="sr-only"
         >
-          {STATUS_LABELS[status] ?? ""}
+          {AZ.statusLabels[status] ?? ""}
         </div>
       </div>
     );

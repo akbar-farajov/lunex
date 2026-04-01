@@ -833,7 +833,7 @@ export type PromptInputTextareaProps = ComponentProps<
 export const PromptInputTextarea = ({
   onChange,
   className,
-  placeholder = "What would you like to know?",
+  placeholder = "Nə bilmək istərdiniz?",
   ...props
 }: PromptInputTextareaProps) => {
   const controller = useOptionalPromptInputController();
@@ -904,7 +904,7 @@ export const PromptInputTextarea = ({
 
   return (
     <InputGroupTextarea
-      className={cn("field-sizing-content max-h-48 min-h-16", className)}
+      className={cn("field-sizing-content max-h-48 min-h-16 text-base leading-relaxed", className)}
       name="message"
       aria-label={placeholder}
       onCompositionEnd={() => setIsComposing(false)}
@@ -1049,10 +1049,10 @@ export const PromptInputSubmit = ({
   const handleClick = isStreaming ? onStop : undefined;
 
   const submitLabel = isStreaming
-    ? "Stop generating"
+    ? "Yaratmanı dayandır"
     : status === "submitted"
-      ? "Sending message…"
-      : "Send message";
+      ? "Mesaj göndərilir…"
+      : "Mesaj göndər";
 
   return (
     <InputGroupButton

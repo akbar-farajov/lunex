@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, memo } from "react";
-import { PaperclipIcon } from "lucide-react";
+import { GlobeIcon, PaperclipIcon } from "lucide-react";
 import Image from "next/image";
 import { Message } from "@/components/ai-elements/message";
 import { MessageContent } from "@/components/ai-elements/message";
@@ -58,6 +58,19 @@ export const PureAIMessage: FC<PureAIMessageProps> = ({
                     )}
                   </ToolContent>
                 </Tool>
+              );
+            case "tool-google_search":
+              return (
+                <div
+                  key={`${message.id}-${partIndex}-tool-google_search`}
+                  className="flex items-center gap-2 text-sm text-muted-foreground py-1.5"
+                  role="status"
+                >
+                  <GlobeIcon className="size-4" aria-hidden="true" />
+                  {part.state === "output-available"
+                    ? "Searched the web"
+                    : "Searching the web\u2026"}
+                </div>
               );
             case "tool-imageGeneration":
               return (

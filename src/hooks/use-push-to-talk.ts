@@ -30,7 +30,7 @@ interface UsePushToTalkReturn {
 export function usePushToTalk({
   onSubmit,
   onStatusChange,
-  lang = "en-US",
+  lang = "az-AZ",
 }: UsePushToTalkOptions): UsePushToTalkReturn {
   const {
     isSupported,

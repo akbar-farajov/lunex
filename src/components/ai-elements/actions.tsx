@@ -13,7 +13,7 @@ import type { ComponentProps } from "react";
 export type ActionsProps = ComponentProps<"div">;
 
 export const Actions = ({ className, children, ...props }: ActionsProps) => (
-  <div className={cn("flex items-center gap-1", className)} {...props}>
+  <div className={cn("flex items-center gap-1.5", className)} {...props}>
     {children}
   </div>
 );
@@ -35,7 +35,7 @@ export const Action = ({
   const button = (
     <Button
       className={cn(
-        "relative size-9 p-1.5 text-muted-foreground hover:text-foreground",
+        "relative size-10 p-2 text-muted-foreground hover:text-foreground",
         className
       )}
       size={size}
@@ -54,7 +54,7 @@ export const Action = ({
         <Tooltip>
           <TooltipTrigger asChild>{button}</TooltipTrigger>
           <TooltipContent>
-            <p>{tooltip}</p>
+            <p className="text-sm">{tooltip}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

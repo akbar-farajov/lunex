@@ -7,12 +7,13 @@ import {
   RefreshCcwIcon,
   Volume2Icon,
   SquareIcon,
+  Loader2Icon,
 } from "lucide-react";
 import { Action } from "@/components/ai-elements/actions";
 import { Actions } from "@/components/ai-elements/actions";
 import { useChatActions } from "@ai-sdk-tools/store";
-import { useSpeechSynthesis } from "@/hooks/use-speech-synthesis";
-import { cleanTextForSpeech } from "@/lib/text-utils";
+import { useVoicePlayback } from "@/hooks/use-voice-playback";
+import { AZ } from "@/lib/az-strings";
 
 interface AIMessageActionsProps {
   messageId: string;
@@ -25,7 +26,7 @@ const PureAIMessageActions: FC<AIMessageActionsProps> = ({
 }) => {
   const { regenerate } = useChatActions();
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const { isSpeaking, speak, stop } = useSpeechSynthesis();
+  const { isPlaying, isLoading, play, stop } = useVoicePlayback();
 
   const handleCopy = useCallback(async (text: string, id: string) => {
     try {
@@ -38,13 +39,12 @@ const PureAIMessageActions: FC<AIMessageActionsProps> = ({
   }, []);
 
   const handleSpeak = useCallback(() => {
-    if (isSpeaking) {
+    if (isPlaying || isLoading) {
       stop();
     } else {
-      const cleanedText = cleanTextForSpeech(textContent);
-      speak(cleanedText);
+      play(textContent);
     }
-  }, [isSpeaking, textContent, speak, stop]);
+  }, [isPlaying, isLoading, textContent, play, stop]);
 
   const handleRegenerate = useCallback(() => {
     regenerate({ messageId });
@@ -54,19 +54,20 @@ const PureAIMessageActions: FC<AIMessageActionsProps> = ({
     handleCopy(textContent, messageId);
   }, [handleCopy, textContent, messageId]);
 
-  const speakLabel = isSpeaking ? "Stop response" : "Listen to response";
+  const isActive = isPlaying || isLoading;
+  const speakLabel = isActive ? AZ.actions.stopListening : AZ.actions.listen;
 
   return (
     <Actions
       className="flex justify-start w-full opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity"
       role="toolbar"
-      aria-label="Message actions"
+      aria-label="Mesaj əməliyyatları"
     >
-      <Action label="Copy" tooltip="Copy" variant="ghost" onClick={onCopyClick}>
+      <Action label={AZ.actions.copy} tooltip={AZ.actions.copy} variant="ghost" onClick={onCopyClick}>
         {copiedId === messageId ? (
-          <CheckIcon className="size-4" />
+          <CheckIcon className="size-5" />
         ) : (
-          <CopyIcon className="size-4" />
+          <CopyIcon className="size-5" />
         )}
       </Action>
       <Action
@@ -75,19 +76,21 @@ const PureAIMessageActions: FC<AIMessageActionsProps> = ({
         variant="ghost"
         onClick={handleSpeak}
       >
-        {isSpeaking ? (
-          <SquareIcon className="size-4" />
+        {isLoading ? (
+          <Loader2Icon className="size-5 animate-spin" />
+        ) : isPlaying ? (
+          <SquareIcon className="size-5" />
         ) : (
-          <Volume2Icon className="size-4" />
+          <Volume2Icon className="size-5" />
         )}
       </Action>
       <Action
-        label="Regenerate"
-        tooltip="Regenerate"
+        label={AZ.actions.regenerate}
+        tooltip={AZ.actions.regenerate}
         variant="ghost"
         onClick={handleRegenerate}
       >
-        <RefreshCcwIcon className="size-4" />
+        <RefreshCcwIcon className="size-5" />
       </Action>
     </Actions>
   );

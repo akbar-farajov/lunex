@@ -34,7 +34,8 @@ import {
 } from "@/hooks/use-auto-voice-flow";
 import type { PushToTalkEvent } from "@/hooks/use-push-to-talk";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
-import { cleanTextForSpeech } from "@/lib/text-utils";
+import { useVoicePlayback } from "@/hooks/use-voice-playback";
+import { AZ } from "@/lib/az-strings";
 
 interface ChatProps {
   chatId?: string;
@@ -65,7 +66,8 @@ export const Chat: FC<ChatProps> = ({
 
   const instructionsRef = useRef<WelcomeInstructionsHandle>(null);
   const composerRef = useRef<ChatComposerHandle>(null);
-  const responseUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  const responsePlayback = useVoicePlayback();
 
   useEffect(() => {
     if (pathname === "/new" || pathname === "/new/") {
@@ -216,14 +218,14 @@ export const Chat: FC<ChatProps> = ({
   const handleVoiceStatusChange = useCallback(
     (event: PushToTalkEvent, error?: string | null) => {
       const statusMap: Record<PushToTalkEvent, VoiceFlowStatus | null> = {
-        listening: "Listening...",
-        stopped: "Recording stopped.",
-        submitting: "Submitting message...",
+        listening: AZ.voiceStatus.listening,
+        stopped: AZ.voiceStatus.recordingStopped,
+        submitting: AZ.voiceStatus.submitting,
         idle: null,
         error:
           error === "not-allowed"
-            ? "Microphone permission is required."
-            : "Speech recognition failed.",
+            ? AZ.voiceStatus.micPermission
+            : AZ.voiceStatus.recognitionFailed,
       };
       const mapped = statusMap[event];
       if (mapped) setVoiceStatus(mapped);
@@ -234,41 +236,23 @@ export const Chat: FC<ChatProps> = ({
   const playLatestResponse = useCallback(() => {
     const text = lastAssistantTextRef.current;
     if (!text) return;
-
-    window.speechSynthesis.cancel();
-    responseUtteranceRef.current = null;
-
-    const cleaned = cleanTextForSpeech(text);
-    if (!cleaned) return;
-
-    const utterance = new SpeechSynthesisUtterance(cleaned);
-    responseUtteranceRef.current = utterance;
-
-    utterance.onstart = () => setVoiceStatus("Playing response...");
-    utterance.onend = () => {
-      setVoiceStatus("");
-      responseUtteranceRef.current = null;
-    };
-    utterance.onerror = (e) => {
-      if (e.error !== "interrupted" && e.error !== "canceled") {
-        setVoiceStatus("");
-      }
-      responseUtteranceRef.current = null;
-    };
-
-    window.speechSynthesis.speak(utterance);
-  }, [setVoiceStatus]);
+    setVoiceStatus(AZ.voiceStatus.playingResponse);
+    responsePlayback.play(text);
+  }, [setVoiceStatus, responsePlayback]);
 
   const stopAllSpeech = useCallback(() => {
-    window.speechSynthesis.cancel();
+    responsePlayback.stop();
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
     setVoiceStatus("");
-  }, [setVoiceStatus]);
+  }, [setVoiceStatus, responsePlayback]);
 
   useEffect(() => {
-    return () => {
-      responseUtteranceRef.current = null;
-    };
-  }, []);
+    if (responsePlayback.status === "idle" && voiceStatus === AZ.voiceStatus.playingResponse) {
+      setVoiceStatus("");
+    }
+  }, [responsePlayback.status, voiceStatus, setVoiceStatus]);
 
   useKeyboardShortcuts({
     i: () => instructionsRef.current?.play(),
@@ -279,11 +263,11 @@ export const Chat: FC<ChatProps> = ({
   });
 
   return (
-    <main className="flex flex-col h-full" aria-label="Chat">
+    <main className="flex flex-col h-full" aria-label="Söhbət">
       <Header
         leftContent={
           currentChatId ? (
-            <span className="text-sm font-medium line-clamp-1">{title}</span>
+            <span className="text-base font-medium line-clamp-1">{title}</span>
           ) : undefined
         }
       />
@@ -291,7 +275,7 @@ export const Chat: FC<ChatProps> = ({
       <ShortcutHelp />
       <VoiceStatusBar voiceStatus={voiceStatus} />
       <Messages profile={profile} chatId={initialChatId} />
-      <div className="px-2">
+      <div className="px-3">
         <ChatComposer
           ref={composerRef}
           onSubmit={handleSubmit}

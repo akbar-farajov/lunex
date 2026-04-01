@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { AZ } from "@/lib/az-strings";
 
 export interface ShortcutEntry {
   key: string;
@@ -8,11 +9,11 @@ export interface ShortcutEntry {
 }
 
 export const SHORTCUTS: ShortcutEntry[] = [
-  { key: "I", label: "Instructions" },
-  { key: "R", label: "Record" },
-  { key: "P", label: "Play response" },
-  { key: "X", label: "Stop speech" },
-  { key: "S", label: "Focus input" },
+  { key: "I", label: AZ.shortcuts.instructions },
+  { key: "R", label: AZ.shortcuts.record },
+  { key: "P", label: AZ.shortcuts.playResponse },
+  { key: "X", label: AZ.shortcuts.stopSpeech },
+  { key: "S", label: AZ.shortcuts.focusInput },
 ];
 
 type ShortcutHandlerMap = Record<string, () => void>;

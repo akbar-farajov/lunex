@@ -1,18 +1,19 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { AZ } from "@/lib/az-strings";
 
 export type VoiceFlowStatus =
   | ""
-  | "Listening..."
-  | "Recording stopped."
-  | "Submitting message..."
-  | "Assistant is responding..."
-  | "Response ready."
-  | "Playing response..."
-  | "Response playback stopped."
-  | "Speech recognition failed."
-  | "Microphone permission is required.";
+  | typeof AZ.voiceStatus.listening
+  | typeof AZ.voiceStatus.recordingStopped
+  | typeof AZ.voiceStatus.submitting
+  | typeof AZ.voiceStatus.responding
+  | typeof AZ.voiceStatus.responseReady
+  | typeof AZ.voiceStatus.playingResponse
+  | typeof AZ.voiceStatus.playbackStopped
+  | typeof AZ.voiceStatus.recognitionFailed
+  | typeof AZ.voiceStatus.micPermission;
 
 interface UseVoiceFlowOptions {
   chatStatus: string;
@@ -35,11 +36,11 @@ export function useVoiceFlow({
     const isNowReady = chatStatus === "ready" || chatStatus === "idle";
 
     if (chatStatus === "submitted") {
-      setVoiceStatus("Assistant is responding...");
+      setVoiceStatus(AZ.voiceStatus.responding);
     }
 
     if (wasStreaming && isNowReady) {
-      setVoiceStatus("Response ready.");
+      setVoiceStatus(AZ.voiceStatus.responseReady);
     }
 
     prevChatStatusRef.current = chatStatus;
